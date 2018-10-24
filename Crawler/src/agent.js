@@ -6,7 +6,7 @@ class Agent {
   }
 
   fetchAndProcessMostFollowedUsers(allMostFollowedUsersAreFound) {
-    const targetUrl = 'https://api.github.com/search/users?q=followers:>=1000';
+    const targetUrl = 'https://api.github.com/search/users?q=followers:>=1000&per_page=100';
     let users = [];
 
     function fetchAndProcessPage(pageUrl, credentials) {

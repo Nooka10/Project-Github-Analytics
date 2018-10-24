@@ -14,3 +14,4 @@ hs_err_pid*
 # Node modules
 /Crawler/node_modules
 /client/node_modules
+/Serveur/node_modules

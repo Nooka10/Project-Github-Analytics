@@ -9,7 +9,7 @@ const baseUrl =  window.location.hostname === 'localhost'
 const defaultSearch = 'octocat';
 
 function getUser(username) {
-  return fetch(`https://api.github.com/search/users?q=followers:>=1000`)
+  return fetch(`https://api.github.com/search/users?q=followers:>=1000?per_page=100`)
     .then(res => res.json());
 }
 

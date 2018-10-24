@@ -11,24 +11,27 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import AppBar from '@material-ui/core/AppBar';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
 
 let counter = 0;
-function createData(avatar, pseudo, name, nb_followers, stars) {
+function createData(avatar, pseudo, name, nb_followers, location, link) {
   counter += 1;
-  return { id: counter, avatar, pseudo, name, nb_followers, stars };
+  return { id: counter, avatar, pseudo, name, nb_followers, location, link };
 }
 
-
 function getUser() {
-  return fetch(`https://api.github.com/search/users?q=followers:>=1000`)
+  return fetch('http://localhost:3000/followers')
     .then(res => res.json());
 }
 
 function returnUsers() {
   return getUser()
-    .then(res => (res.items.map(item => createData(item.avatar_url, 3, 4, 4, 3))))
+    .then(res => (res.map(item => createData(item.avatar, item.pseudo, item.name, item.nb_followers , 'baf', 'https://github.com/tenderlove'))))
 }
 
 
@@ -57,11 +60,12 @@ function getSorting(order, orderBy) {
 }
 
 const rows = [
-  { id: 'avatar', numeric: false, disablePadding: true, label: 'Avatar' },
-  { id: 'pseudo', numeric: false, disablePadding: true, label: 'Pseudo' },
-  { id: 'name', numeric: false, disablePadding: true, label: 'Name' },
-  { id: 'nb_followers', numeric: true, disablePadding: false, label: 'Followers' },
-  { id: 'stars', numeric: true, disablePadding: false, label: 'Stars' },
+  { id: 'avatar', numeric: false, disablePadding: true, activeSort: false, label: 'Avatar' },
+  { id: 'pseudo', numeric: false, disablePadding: true, activeSort: true,label: 'Pseudo' },
+  { id: 'name', numeric: false, disablePadding: true, activeSort: false,label: 'Name' },
+  { id: 'nb_followers', numeric: false, disablePadding: true, activeSort: true,label: 'Followers' },
+  { id: 'location', numeric: false, disablePadding: true, activeSort: true,label: 'Location' },
+  { id: 'github_link', numeric: false, disablePadding: true, activeSort: false,label: 'Github Profil' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -70,7 +74,7 @@ class EnhancedTableHead extends React.Component {
   };
 
   render() {
-    const { onSelectAllClick, order, orderBy, numSelected, rowCount } = this.props;
+    const {  order, orderBy,  rowCount } = this.props;
 
     return (
       <TableHead>
@@ -83,7 +87,10 @@ class EnhancedTableHead extends React.Component {
                 padding={row.disablePadding ? 'none' : 'default'}
                 sortDirection={orderBy === row.id ? order : false}
               >
-                <Tooltip
+
+              {
+                row.activeSort ? (
+                  <Tooltip
                   title="Sort"
                   placement={row.numeric ? 'bottom-end' : 'bottom-start'}
                   enterDelay={300}
@@ -96,6 +103,17 @@ class EnhancedTableHead extends React.Component {
                     {row.label}
                   </TableSortLabel>
                 </Tooltip>
+                ) : (
+                  <TableHead
+                   
+                  >
+                    {row.label}
+                  </TableHead>
+                )
+                
+
+              }
+                
               </TableCell>
             );
           }, this)}
@@ -106,9 +124,7 @@ class EnhancedTableHead extends React.Component {
 }
 
 EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.string.isRequired,
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
@@ -159,7 +175,6 @@ let EnhancedTableToolbar = props => {
 
 EnhancedTableToolbar.propTypes = {
   classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired,
 };
 
 EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
@@ -168,6 +183,8 @@ const styles = theme => ({
   root: {
     width: '100%',
     marginTop: theme.spacing.unit * 3,
+    backgroundColor: theme.palette.background.paper,
+
   },
   table: {
     minWidth: 1020,
@@ -182,17 +199,21 @@ class EnhancedTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      order: 'asc',
+      order: 'desc',
       orderBy: 'nb_followers',
-      selected: [],
       data: [],
       page: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 10,
+      value: 0,
     };
     returnUsers().then(res => {
       this.setState({ data: res })
     })
   }
+
+  handleChange = (event, value) => {
+    this.setState({ value });
+  };
 
 
   handleRequestSort = (event, property) => {
@@ -206,35 +227,6 @@ class EnhancedTable extends React.Component {
     this.setState({ order, orderBy });
   };
 
-  handleSelectAllClick = event => {
-    if (event.target.checked) {
-      this.setState(state => ({ selected: state.data.map(n => n.id) }));
-      return;
-    }
-    this.setState({ selected: [] });
-  };
-
-  handleClick = (event, id) => {
-    const { selected } = this.state;
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    this.setState({ selected: newSelected });
-  };
-
   handleChangePage = (event, page) => {
     this.setState({ page });
   };
@@ -243,25 +235,37 @@ class EnhancedTable extends React.Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  isSelected = id => this.state.selected.indexOf(id) !== -1;
+  handleChangeData  = event => {
+    this.setState({ data: [] });
+  };
+
 
   render() {
-    { console.log(this.state.data) }
+  
 
     const { classes } = this.props;
-    const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+    const { data, order, orderBy, rowsPerPage, page } = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+    const { value } = this.state;
 
     return (
+      
       <Paper className={classes.root}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <AppBar position="static">
+          <Tabs value={value} onChange={this.handleChange} centered>
+          <Tab label="Most following users" />
+          <Tab label="Most starred repos" />
+          <Tab label="Most forked repos" />
+          </Tabs>
+        </AppBar>
+      
+        <EnhancedTableToolbar  />
         <div className={classes.tableWrapper}>
           <Table className={classes.table} aria-labelledby="tableTitle">
             <EnhancedTableHead
-              numSelected={selected.length}
+            
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={this.handleSelectAllClick}
               onRequestSort={this.handleRequestSort}
               rowCount={data.length}
             />
@@ -269,24 +273,25 @@ class EnhancedTable extends React.Component {
               {stableSort(data, getSorting(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map(n => {
-                  const isSelected = this.isSelected(n.id);
                   return (
                     <TableRow
                       hover
-                      onClick={event => this.handleClick(event, n.id)}
                       role="checkbox"
-                      aria-checked={isSelected}
                       tabIndex={-1}
                       key={n.id}
-                      selected={isSelected}
                     >
                       <TableCell component="th" scope="row" padding="none">
                         {<img id="avatar_user" alt="avatar_user" src={n.avatar} style={{ height: 50, width: 50, borderRadius: 2, overflow: 'hidden' }} />}
                       </TableCell>
                       <TableCell >{n.pseudo}</TableCell>
                       <TableCell >{n.name}</TableCell>
-                      <TableCell numeric>{n.nb_followers}</TableCell>
-                      <TableCell numeric>{n.stars}</TableCell>
+                      <TableCell >{n.nb_followers}</TableCell>
+                      <TableCell>{n.location}</TableCell>
+                      <TableCell>
+                      <Button variant="outlined" className={classes.button} onClick={this.handleChangeData}>
+        Go to the profil
+      </Button>
+                      {n.github_link}</TableCell>
                     </TableRow>
                   );
                 })}

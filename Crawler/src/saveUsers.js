@@ -7,7 +7,7 @@ const Agent = require('./agent.js');
 
 const agent = new Agent(credentials);
 
-mongoose.connect('mongodb://192.168.99.100:27017/demo');
+mongoose.connect('mongodb+srv://ouzgaga:ouzgaga@cluster0-7foch.gcp.mongodb.net/GithubAnalytics?retryWrites=true');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
@@ -17,8 +17,11 @@ const userSchema = new Schema({
   nb_followers: Number,
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('followers', userSchema);
 
+User.remove({}, () => {
+  console.log('collection removed');
+});
 
 agent.fetchAndProcessMostFollowedUsers((err, users) => {
   users.map((tab) => {
@@ -36,6 +39,7 @@ agent.fetchAndProcessMostFollowedUsers((err, users) => {
               });
               u.save().then(() => console.log('inscrit'));
             }
+            return null;
           });
         }
         return null;
@@ -44,6 +48,8 @@ agent.fetchAndProcessMostFollowedUsers((err, users) => {
     return null;
   });
 });
+
+// mongoose.connection.close();
 
 /*
 const kitty2 = new Cat({ pseudo: 'Zildjian', followers: 23 });
