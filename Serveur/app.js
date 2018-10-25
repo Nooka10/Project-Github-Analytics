@@ -1,6 +1,8 @@
 // loads environment variables
 require('dotenv/config');
-require('./src/models/user.model');
+require('./src/models/followers.model');
+require('./src/models/forks.model');
+require('./src/models/stars.model');
 const express = require('express');
 const cors = require('cors');
 const httpStatus = require('http-status');
@@ -9,7 +11,9 @@ const config = require('./config/config');
 mongoose.Promise = require('bluebird');
 
 mongoose.connect(config.db);
-const User = mongoose.model('followers');
+const FollowedUserModel = mongoose.model('most_followed_users');
+const StarredReposModel = mongoose.model('starred_repos');
+const ForkedReposModel = mongoose.model('forked_repos');
 
 const app = express();
 
@@ -17,7 +21,19 @@ const app = express();
 app.use(cors());
 
 app.get('/followers', (req, res, next) => { // eslint-disable-line no-unused-vars
-  User.find({}, (err, users) => {
+  FollowedUserModel.find({}, (err, users) => {
+    res.send(users);
+  });
+});
+
+app.get('/stars', (req, res, next) => { // eslint-disable-line no-unused-vars
+  StarredReposModel.find({}, (err, users) => {
+    res.send(users);
+  });
+});
+
+app.get('/forks', (req, res, next) => { // eslint-disable-line no-unused-vars
+  ForkedReposModel.find({}, (err, users) => {
     res.send(users);
   });
 });

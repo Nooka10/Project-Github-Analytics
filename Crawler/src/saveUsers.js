@@ -7,54 +7,106 @@ const Agent = require('./agent.js');
 
 const agent = new Agent(credentials);
 
-mongoose.connect('mongodb+srv://ouzgaga:ouzgaga@cluster0-7foch.gcp.mongodb.net/GithubAnalytics?retryWrites=true');
-const { Schema } = mongoose;
-
-const userSchema = new Schema({
-  avatar: { type: String, required: false },
-  pseudo: { type: String, required: false },
-  name: { type: String, required: false },
-  nb_followers: Number,
+mongoose.connect('mongodb+srv://ouzgaga:ouzgaga@cluster0-7foch.gcp.mongodb.net/GithubAnalytics?retryWrites=true', (err) => {
+  if (err) { throw err; }
 });
 
-const User = mongoose.model('followers', userSchema);
+const { Schema } = mongoose;
 
-User.remove({}, () => {
-  console.log('collection removed');
+const mostFollowedUserSchema = new Schema({
+  avatar: { type: String, required: true },
+  pseudo: { type: String, required: true },
+  name: { type: String, required: false },
+  nb_followers: { type: Number, required: true },
+  location: { type: String, required: false },
+  link: { type: String, required: true },
+});
+
+const FollowedUserModel = mongoose.model('most_followed_users', mostFollowedUserSchema);
+
+FollowedUserModel.remove({}, () => {
+  console.log('collection most_followed_users removed');
 });
 
 agent.fetchAndProcessMostFollowedUsers((err, users) => {
-  users.map((tab) => {
-    if (tab.items !== undefined) {
-      tab.items.map((user) => {
-        if (user !== undefined) {
-          agent.fetchAndProcessUserInformations(user.login, (err2, userInfos) => {
-            if (!err2) {
-              console.log(userInfos.avatar_url);
-              const u = new User({
-                avatar: userInfos.avatar_url,
-                pseudo: userInfos.login,
-                name: userInfos.name,
-                nb_followers: userInfos.followers,
-              });
-              u.save().then(() => console.log('inscrit'));
-            }
-            return null;
-          });
-        }
-        return null;
+  users.forEach((tab) => {
+    tab.items.forEach((user) => {
+      agent.fetchAndProcessUserInformations(user.login, ((err, userInfos) => {
+        const u = new FollowedUserModel({
+          avatar: userInfos.avatar_url,
+          pseudo: userInfos.login,
+          name: userInfos.name,
+          nb_followers: userInfos.followers,
+          location: userInfos.location,
+          link: userInfos.html_url,
+        });
+        u.save().then(() => console.log('inscrit'));
+      }));
+    });
+  });
+});
+
+
+const mostStarredReposSchema = new Schema({
+  repo_name: { type: String, required: true },
+  owner: { type: String, required: true },
+  language: { type: String, required: false },
+  nb_stars: { type: Number, required: true },
+  description: { type: String, required: false },
+  link: { type: String, required: true },
+});
+
+const StarredRepoModel = mongoose.model('starred_repos', mostStarredReposSchema);
+
+StarredRepoModel.remove({}, () => {
+  console.log('collection starred_repos removed');
+});
+
+agent.fetchAndProcessMostStarredRepos((err, tab) => {
+  tab.forEach((repos) => {
+    repos.items.forEach((repo) => {
+      const r = new StarredRepoModel({
+        repo_name: repo.name,
+        owner: repo.owner.login,
+        language: repo.language,
+        nb_stars: repo.stargazers_count,
+        description: repo.description,
+        link: repo.html_url,
       });
-    }
-    return null;
+      r.save().then(() => console.log('inscrit'));
+    });
+  });
+});
+
+const mostForkedReposSchema = new Schema({
+  repo_name: { type: String, required: true },
+  owner: { type: String, required: true },
+  language: { type: String, required: false },
+  nb_forks: { type: Number, required: true },
+  description: { type: String, required: false },
+  link: { type: String, required: true },
+});
+
+const ForkedReposModel = mongoose.model('forked_repos', mostForkedReposSchema);
+
+ForkedReposModel.remove({}, () => {
+  console.log('collection forked_repos removed');
+});
+
+agent.fetchAndProcessMostForkedRepos((err, tab) => {
+  tab.forEach((repos) => {
+    repos.items.forEach((repo) => {
+      const r = new ForkedReposModel({
+        repo_name: repo.name,
+        owner: repo.owner.login,
+        language: repo.language,
+        nb_forks: repo.forks_count,
+        description: repo.description,
+        link: repo.html_url,
+      });
+      r.save().then(() => console.log('inscrit'));
+    });
   });
 });
 
 // mongoose.connection.close();
-
-/*
-const kitty2 = new Cat({ pseudo: 'Zildjian', followers: 23 });
-kitty2.save().then(() => console.log('meow'));
-
-const kitty3 = new Cat({ pseudo: 'Zildjian', followers: 23 });
-kitty3.save().then(() => console.log('meow'));
-*/
