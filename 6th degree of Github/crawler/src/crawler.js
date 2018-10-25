@@ -1,0 +1,155 @@
+const request = require('superagent');
+const config = require('./config');
+
+class Crawler {
+  /**
+   * Construit le Crawler qui va petit à petit récupérer tous les utilisateurs de Github ainsi que leurs followers et les ajouter au graph de notre API.
+   */
+  constructor () {
+    this.loggedUsername = process.env.loggedUsername;
+    this.oauth_token = process.env.oauth_token;
+    const url = `${config.url}utils/`;
+    // on récupère la valeur enregistré dans la DB -> on continuera le crawling à partir de cet id.
+    request.get(url)
+      .then((res) => {
+        if (res.body.length === 0) { // il n'y a pas de valeur enregistrée dans la DB
+          return request.post(url, { numberFirstTovisit: 0 }) // on en crée une valant 0 dans la DB
+            .then((val) => {
+              this.firstUserToVisit = val.body;
+            });
+        } // une valeur existe déjà dans la DB --> on la récupère
+        this.firstUserToVisit = res.body[0];
+      }).then(() => {
+      this.fetchAndProcessCrawler(); // lance le crawler
+    }).catch(err => console.log(`erreur dans le constructeur: ${err}`));
+  }
+
+  /**
+   * S'il n'y a pas d'utilisateur à visiter, en récupère 30 via l'API Github et les ajoute à la DB.
+   * Ensuite, récupère tous les followers de chaque utilisateur pas encore visité, les ajoute à la DB et au graph de notre API.
+   */
+  fetchAndProcessCrawler () {
+    this.fetchUserToVisit().then((usersToVisit) => {
+      if (usersToVisit.length === 0) { // il n'y a plus d'utilisateur en attente de visite.
+        this.fetchGithubUsers(); // on récupère les 30 prochains utilisateurs via l'API Github et on les enregistre dans notre DB.
+        /*
+        .then(() => this.fetchUserToVisit()) // On récupère tous les utilisateurs à visiter dans la base de données.
+        .then(() => this.userToVisit.forEach((user) => {
+          this.visitUser(user); // On visite chaque utilisateur présent dans le tableau des utilisateurs à visiter.
+        })).catch(err => console.log(`erreur dans fetchAndProcessCrawler (if): ${err}`));
+        */
+      } else { // il y a des utilisateurs en attente de visite --> on les visite
+        usersToVisit.forEach((user) => {
+          this.visitUser(user); // On visite chaque utilisateur présent dans le tableau des utilisateurs à visiter.
+        });
+      }
+    });
+  }
+
+  /**
+   * Visite l'utilisateur reçu en paramètre. Visiter un utilisateur correspond à parcourir tous ces followers et les ajouter à notre DB.
+   * @param user, l'utilisateur Github à visiter.
+   * @returns {Promise<T | void>}
+   */
+  visitUser (user) {
+    const url = `${config.url}users/${user.login}`;
+    user.visited = true;
+    return this.fetchUserFollowers(user)
+      .then(() => request.put(url, user)) // on met à jour notre DB pour enregistrer que l'utilisateur à été visité (visited = true).
+      .catch(err => console.log(`erreur dans visitUser: ${err}`));
+  }
+
+  /**
+   * Récupère 30 utilisateur via l'API Github et les ajoute à la base de données.
+   * @returns {Promise<T | void>}
+   */
+  fetchGithubUsers () {
+    const url = `https://api.github.com/users?since=${this.firstUserToVisit.numberFirstTovisit}`; // on récupère les utilisateurs à partir de ceux qui n'ont
+    // pas encore été récupérés.
+    return request.get(url)
+      .auth(this.loggedUsername, this.oauth_token)
+      .then(res => res.body.forEach(
+        user => this.addUserToDB(user) // On ajoute chaque utilisateur récupéré à notre DB.
+          .then(() => this.firstUserToVisit.numberFirstTovisit += 1) // après chaque ajout, on incrémente de 1 le numéro du 1er user à récupérer dans l'API
+        // Github
+      ))
+      .then(() => {
+        const urlPut = `${config.url}utils/${this.firstUserToVisit._id}`;
+        return request.put(urlPut, this.firstUserToVisit); // on met à jour le nombre d'utilisateurs récupérés sur l'API Github dans notre DB.
+      })
+      .catch(err => console.log(`erreur dans fetchGithubUsers: ${err}`));
+  }
+
+  /**
+   * Récupère dans la DB tous les utilisateurs qui n'ont pas encore été visités.
+   * @returns {Promise<T | void>}
+   */
+  fetchUserToVisit () {
+    const url = `${config.url}users`;
+    return request.get(url)
+      .query({ visited: false })
+      .then(results => results.body) // on ajoute tous les utilisateurs à visiter au tableau this.userToVisit.
+      .catch(err => console.log(`erreur dans fetchUserToVisit: ${err}`));
+  }
+
+  /**
+   * Ajoute l'utilisateur passé en paramètre à notre DB via notre API. On enregistre que le login de l'utilisateur.
+   * @param user, l'utilisateur Github à ajouter à notre DB.
+   * @returns {Promise<T | void>}
+   */
+  addUserToDB (user) {
+    const url = `${config.url}users`;
+    return request.get(url)
+      .query({ login: user.login }) // on check si l'utilisateur est déjà dans notre DB
+      .then((result) => {
+        if (result.body.length === 0) { // l'utilisateur n'a pas été trouvé dans la DB -> il faut l'ajouter
+          return request.post(`${url}/`, { login: user.login, visited: false });
+        }
+        // l'utilisateur est déjà présent dans la DB -> rien à faire.
+        // return Promise.resolve();
+      })
+      .catch(err => {
+        return console.log(`erreur dans addUserToDB: ${err}`);
+      });
+  }
+
+  /**
+   * Ajoute tous les followers de l'utilisateur reçu en paramètre à notre DB, comme utilisateurs à visiter et relie l'utilisateur à chaqu'un de ses
+   * followers dans le graphe de notre API.
+   * @param user, l'utilisateur dont on souhaite fetcher les followers.
+   * @returns {Promise<T | void>}
+   */
+  fetchUserFollowers (user) {
+    const url = `https://api.github.com/users/${user.login}/followers`;
+    return request.get(url)
+      .auth(this.loggedUsername, this.oauth_token)
+      .then(res => {
+        return res.body.forEach(u => { // on ajoute tous les followers de l'utilisateur passé en paramètre à notre DB et dans notre graphe.
+          const urlPost = `${config.url}users/addEdge`;
+          return this.addUserToDB(u) // on ajoute le follower à notre DB.
+            .then(() => request.post(urlPost, { usernameFrom: user.login, usernameTo: u.login })); // on ajoute un edge entre l'utilisateur et le follower
+          // dans le graph de notre API.
+        }, 0);
+      })
+      .catch(err => console.log((`erreur dans fetchUserFollowers: ${err}`)));
+  }
+
+  /**
+   * Active le crawler. Celui-ci récupèrera autant d'utilisateur que possible, tant que les 5'000 requêtes ne sont pas atteintes.
+   * Il se relance automatiquement toutes les heures.
+   */
+  // TODO: ajouter récupération d'un max j-> atteindre 5'000 requêtes.
+  activateCrawler () {
+    this.fetchAndProcessCrawler(); // lance une 1ère fois le crawler
+    // this.timer = setInterval(this.fetchAndProcessCrawler, 10000); // attend une minute avant de relancer le crawler.
+  }
+
+  /**
+   * Permet de désactiver le crawler.
+   */
+  desactivateCrawler () {
+    clearInterval(this.timer);
+  }
+}
+
+module.exports = Crawler;

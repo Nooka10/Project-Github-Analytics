@@ -1,0 +1,130 @@
+{
+  "options": {
+    "directed": true,
+    "multigraph": false,
+    "compound": false
+  },
+  "nodes": [
+    {
+      "v": "pjhyett",
+      "value": "pjhyett"
+    },
+    {
+      "v": "defunkt",
+      "value": "defunkt"
+    },
+    {
+      "v": "mojombo",
+      "value": "mojombo"
+    },
+    {
+      "v": "wycats",
+      "value": "wycats"
+    },
+    {
+      "v": "evanphx",
+      "value": "evanphx"
+    },
+    {
+      "v": "vanpelt",
+      "value": "vanpelt"
+    },
+    {
+      "v": "ivey",
+      "value": "ivey"
+    },
+    {
+      "v": "kevinclark",
+      "value": "kevinclark"
+    },
+    {
+      "v": "brynary",
+      "value": "brynary"
+    },
+    {
+      "v": "ezmobius",
+      "value": "ezmobius"
+    },
+    {
+      "v": "wayneeseguin",
+      "value": "wayneeseguin"
+    },
+    {
+      "v": "topfunky",
+      "value": "topfunky"
+    },
+    {
+      "v": "tomtt",
+      "value": "tomtt"
+    },
+    {
+      "v": "jamesgolick",
+      "value": "jamesgolick"
+    },
+    {
+      "v": "technoweenie",
+      "value": "technoweenie"
+    },
+    {
+      "v": "roland",
+      "value": "roland"
+    },
+    {
+      "v": "nitay",
+      "value": "nitay"
+    },
+    {
+      "v": "errfree",
+      "value": "errfree"
+    },
+    {
+      "v": "takeo",
+      "value": "takeo"
+    },
+    {
+      "v": "fanvsfan",
+      "value": "fanvsfan"
+    },
+    {
+      "v": "KirinDave",
+      "value": "KirinDave"
+    },
+    {
+      "v": "bmizerany",
+      "value": "bmizerany"
+    },
+    {
+      "v": "macournoyer",
+      "value": "macournoyer"
+    },
+    {
+      "v": "anotherjesse",
+      "value": "anotherjesse"
+    },
+    {
+      "v": "railsjitsu",
+      "value": "railsjitsu"
+    },
+    {
+      "v": "atmos",
+      "value": "atmos"
+    },
+    {
+      "v": "Caged",
+      "value": "Caged"
+    },
+    {
+      "v": "lukas",
+      "value": "lukas"
+    },
+    {
+      "v": "kevwil",
+      "value": "kevwil"
+    },
+    {
+      "v": "mojodna",
+      "value": "mojodna"
+    }
+  ],
+  "edges": []
+}
