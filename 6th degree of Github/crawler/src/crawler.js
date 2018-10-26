@@ -19,9 +19,9 @@ class Crawler {
             });
         } // une valeur existe déjà dans la DB --> on la récupère
         this.firstUserToVisit = res.body[0];
-      }).then(() => {
-      this.fetchAndProcessCrawler(); // lance le crawler
-    }).catch(err => console.log(`erreur dans le constructeur: ${err}`));
+        return Promise.resolve();
+      }).then(() => this.fetchAndProcessCrawler() // lance le crawler
+      ).catch(err => console.log(`erreur dans le constructeur: ${err.name}\n${err.message}\n${err.stack}`));
   }
 
   /**
@@ -29,39 +29,42 @@ class Crawler {
    * Ensuite, récupère tous les followers de chaque utilisateur pas encore visité, les ajoute à la DB et au graph de notre API.
    */
   fetchAndProcessCrawler () {
-    this.fetchUserToVisit().then((usersToVisit) => {
-      if (usersToVisit.length === 0) { // il n'y a plus d'utilisateur en attente de visite.
-        this.fetchGithubUsers(); // on récupère les 30 prochains utilisateurs via l'API Github et on les enregistre dans notre DB.
-        /*
-        .then(() => this.fetchUserToVisit()) // On récupère tous les utilisateurs à visiter dans la base de données.
-        .then(() => this.userToVisit.forEach((user) => {
-          this.visitUser(user); // On visite chaque utilisateur présent dans le tableau des utilisateurs à visiter.
-        })).catch(err => console.log(`erreur dans fetchAndProcessCrawler (if): ${err}`));
-        */
-      } else { // il y a des utilisateurs en attente de visite --> on les visite
-        usersToVisit.forEach((user) => {
-          this.visitUser(user); // On visite chaque utilisateur présent dans le tableau des utilisateurs à visiter.
-        });
-      }
-    });
+    return this.fetchUserToVisit()
+      .then((usersToVisit) => {
+        if (usersToVisit.length === 0) { // il n'y a plus d'utilisateur en attente de visite.
+          this.fetchGithubUsers(); // on récupère les 30 prochains utilisateurs via l'API Github et on les enregistre dans notre DB.
+          /*
+          .then(() => this.fetchUserToVisit()) // On récupère tous les utilisateurs à visiter dans la base de données.
+          .then(() => this.userToVisit.forEach((user) => {
+            this.visitUser(user); // On visite chaque utilisateur présent dans le tableau des utilisateurs à visiter.
+          })).catch(err => console.log(`erreur dans fetchAndProcessCrawler (if): ${err.name}\n${err.message}\n${err.stack}`));
+          */
+        } else { // il y a des utilisateurs en attente de visite --> on les visite
+          usersToVisit.forEach((user) => {
+            this.visitUser(user); // On visite chaque utilisateur présent dans le tableau des utilisateurs à visiter.
+          });
+        }
+      });
   }
 
   /**
    * Visite l'utilisateur reçu en paramètre. Visiter un utilisateur correspond à parcourir tous ces followers et les ajouter à notre DB.
    * @param user, l'utilisateur Github à visiter.
-   * @returns {Promise<T | void>}
+   * @returns {Promise<Request | never | void>}
    */
   visitUser (user) {
     const url = `${config.url}users/${user.login}`;
-    user.visited = true;
     return this.fetchUserFollowers(user)
-      .then(() => request.put(url, user)) // on met à jour notre DB pour enregistrer que l'utilisateur à été visité (visited = true).
-      .catch(err => console.log(`erreur dans visitUser: ${err}`));
+      .then(() => {
+        user.visited = true;
+        return request.put(url, user);
+      }) // on met à jour notre DB pour enregistrer que l'utilisateur à été visité (visited = true).
+      .catch(err => console.log(`erreur dans visitUser: ${err.name}\n${err.message}\n${err.stack}`));
   }
 
   /**
    * Récupère 30 utilisateur via l'API Github et les ajoute à la base de données.
-   * @returns {Promise<T | void>}
+   * @returns {*|Promise<T | void>}
    */
   fetchGithubUsers () {
     const url = `https://api.github.com/users?since=${this.firstUserToVisit.numberFirstTovisit}`; // on récupère les utilisateurs à partir de ceux qui n'ont
@@ -70,14 +73,14 @@ class Crawler {
       .auth(this.loggedUsername, this.oauth_token)
       .then(res => res.body.forEach(
         user => this.addUserToDB(user) // On ajoute chaque utilisateur récupéré à notre DB.
-          .then(() => this.firstUserToVisit.numberFirstTovisit += 1) // après chaque ajout, on incrémente de 1 le numéro du 1er user à récupérer dans l'API
-        // Github
+          .then(() => this.firstUserToVisit.numberFirstTovisit = user.id) // après chaque ajout, on incrémente de 1 le numéro du 1er user à récupérer dans
+        // l'API Github
       ))
       .then(() => {
         const urlPut = `${config.url}utils/${this.firstUserToVisit._id}`;
         return request.put(urlPut, this.firstUserToVisit); // on met à jour le nombre d'utilisateurs récupérés sur l'API Github dans notre DB.
       })
-      .catch(err => console.log(`erreur dans fetchGithubUsers: ${err}`));
+      .catch(err => console.log(`erreur dans fetchGithubUsers: ${err.name}\n${err.message}\n${err.stack}`));
   }
 
   /**
@@ -89,7 +92,7 @@ class Crawler {
     return request.get(url)
       .query({ visited: false })
       .then(results => results.body) // on ajoute tous les utilisateurs à visiter au tableau this.userToVisit.
-      .catch(err => console.log(`erreur dans fetchUserToVisit: ${err}`));
+      .catch(err => console.log(`erreur dans fetchUserToVisit: ${err.name}\n${err.message}\n${err.stack}`));
   }
 
   /**
@@ -99,18 +102,7 @@ class Crawler {
    */
   addUserToDB (user) {
     const url = `${config.url}users`;
-    return request.get(url)
-      .query({ login: user.login }) // on check si l'utilisateur est déjà dans notre DB
-      .then((result) => {
-        if (result.body.length === 0) { // l'utilisateur n'a pas été trouvé dans la DB -> il faut l'ajouter
-          return request.post(`${url}/`, { login: user.login, visited: false });
-        }
-        // l'utilisateur est déjà présent dans la DB -> rien à faire.
-        // return Promise.resolve();
-      })
-      .catch(err => {
-        return console.log(`erreur dans addUserToDB: ${err}`);
-      });
+    return request.post(`${url}/`, { login: user.login, visited: false }); // pas besoin de checker si l'utilisateur est déjà dans la DB -> l'API le fait
   }
 
   /**
@@ -123,15 +115,13 @@ class Crawler {
     const url = `https://api.github.com/users/${user.login}/followers`;
     return request.get(url)
       .auth(this.loggedUsername, this.oauth_token)
-      .then(res => {
-        return res.body.forEach(u => { // on ajoute tous les followers de l'utilisateur passé en paramètre à notre DB et dans notre graphe.
-          const urlPost = `${config.url}users/addEdge`;
-          return this.addUserToDB(u) // on ajoute le follower à notre DB.
-            .then(() => request.post(urlPost, { usernameFrom: user.login, usernameTo: u.login })); // on ajoute un edge entre l'utilisateur et le follower
-          // dans le graph de notre API.
-        }, 0);
-      })
-      .catch(err => console.log((`erreur dans fetchUserFollowers: ${err}`)));
+      .then(res => res.body.forEach((u) => { // on ajoute tous les followers de l'utilisateur passé en paramètre à notre DB et dans notre graphe.
+        const urlPost = `${config.url}users/addEdge`;
+        return this.addUserToDB(u) // on ajoute le follower à notre DB.
+          .then(() => request.post(urlPost, { usernameFrom: user.login, usernameTo: u.login })); // on ajoute un edge entre l'utilisateur et le follower
+        // dans le graph de notre API.
+      }, 0))
+      .catch(err => console.log((`erreur dans fetchUserFollowers: ${err.name}\n${err.message}\n${err.stack}`)));
   }
 
   /**

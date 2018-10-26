@@ -8,7 +8,7 @@ require('../models/user.model');
 const User = mongoose.model('User');
 
 router.get('/', (req, res, next) => {
-  let filter = {};
+  const filter = {};
   if (req.query.login !== undefined) {
     filter.login = req.query.login;
   }
@@ -22,7 +22,7 @@ router.get('/', (req, res, next) => {
     });
 });
 
-router.get('/smallestpath', (req, res, next) => {
+router.get('/dijkstra', (req, res, next) => {
   const userFrom = req.query.usernamefrom;
   const userTo = req.query.usernameto;
 
@@ -51,6 +51,41 @@ router.get('/smallestpath', (req, res, next) => {
   }
 });
 
+router.get('/bfs', (req, res, next) => {
+  const userFrom = req.query.usernamefrom;
+  const userTo = req.query.usernameto;
+
+  const graph = req.app.get('graph');
+  if (!graph.hasGivenNode(userFrom) && !graph.hasGivenNode(userTo)) {
+    const nodes = graph.allNodes();
+    res.status(httpStatus.OK)
+      .send(`Les utilisateurs recherchés ne se trouvent pas dans le graph. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`);
+    return;
+  } else if (!graph.hasGivenNode(userFrom)) {
+    const nodes = graph.allNodes();
+    res.status(httpStatus.OK)
+      .send(`L\'utilisateur ${userFrom} ne se trouvent pas dans le graph. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`);
+    return;
+  } else if (!graph.hasGivenNode(userTo)) {
+    const nodes = graph.allNodes();
+    res.status(httpStatus.OK)
+      .send(`L\'utilisateur ${userTo} ne se trouvent pas dans le graph. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`);
+    return;
+  }
+  if (userTo === userFrom) {
+    const nodes = graph.allNodes();
+    res.status(httpStatus.OK)
+      .send(`Les deux utilisateurs entrés sont les mêmes. Veuillez recommencer avec deux utilisateurs différents parmis les suivants: [${nodes}]`);
+    return;
+  }
+
+  const smallestPaths = graph.bfs(userFrom, userTo);
+  if (smallestPaths) {
+    res.status(httpStatus.OK)
+      .send(smallestPaths);
+  }
+});
+
 router.get('/:id', (req, res, next) => User.findById(req.params.id)
   .then((user) => {
     if (user !== null) {
@@ -73,21 +108,28 @@ router.get('/:id', (req, res, next) => User.findById(req.params.id)
   }));
 
 router.post('/', (req, res, next) => {
-  const graph = req.app.get('graph');
-  graph.addNode(req.body.login, req.body.login); // on ajoute un noeud dans le graph
-  return new User(req.body).save()
-    .then((result) => {
-      res.status(httpStatus.OK)
-        .send(result);
-    })
-    .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
-      .send(
-        {
-          status: httpStatus.INTERNAL_SERVER_ERROR,
-          title : err.title,
-          error : err.message
-        }
-      ));
+  return User.find({ login: req.body.login })
+    .then((results) => {
+      if (results.length === 0) { // l'utilisateur n'a pas été trouvé dans la DB -> il faut l'ajouter
+        const graph = req.app.get('graph');
+        graph.addNode(req.body.login, req.body.login); // on ajoute un noeud dans le graph
+
+        return new User(req.body).save()
+          .then((result) => {
+            res.status(httpStatus.OK)
+              .send(result);
+          })
+          .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
+            .send(
+              {
+                status: httpStatus.INTERNAL_SERVER_ERROR,
+                title : err.title,
+                error : err.message
+              }
+            ));
+      }
+      // Si l'utilisateur est déjà présent dans la DB, on ne fait rien.
+    });
 });
 
 router.post('/addEdge', (req, res, next) => {

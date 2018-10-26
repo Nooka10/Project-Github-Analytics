@@ -14,7 +14,7 @@ class Graph {
           this.graph = Graphlib.json.read(JSON.parse(g[0].json));
         } else {
           this.graph = new Graphlib.Graph(
-            /* //FIXME: ne fonctionne pas -> graph dirigé même avec l'option à false...
+            /* // FIXME: ne fonctionne pas -> graph dirigé même avec l'option à false...
             {
               directed  : false
             }
@@ -63,16 +63,50 @@ class Graph {
   }
 
   smallestPath (node1, node2) {
-    let res = Graphlib.alg.dijkstra(this.graph, node1);
+    const res = Graphlib.alg.dijkstra(this.graph, node1);
     // console.log(res);
     return res;
   }
 
-  hasGivenNode(node){
+  /*
+  bfs (node1, node2) {
+    const queue = [node1];
+    const visited = { node1: true };
+    const predecessor = {};
+    let tail = 0;
+
+    while (tail < queue.length) {
+      let u = queue[tail++]; // Pop a vertex off the queue.
+      const neighbors = this.graph.neighbors(u);
+      for (let i = 0; i < neighbors.length; ++i) {
+        const v = neighbors[i];
+        if (visited[v]) {
+          continue;
+        }
+        visited[v] = true;
+        if (v === node2) { // Check if the path is complete.
+          const path = [v]; // If so, backtrack through the path.
+          while (u !== node1) {
+            u = predecessor[u];
+            path.push(u);
+          }
+          path.reverse();
+          console.log(path.join(' &rarr; '));
+          return;
+        }
+        predecessor[v] = u;
+        queue.push(v);
+      }
+    }
+    console.log(`there is no path from ${node1} to ${node2}`);
+  }
+  */
+
+  hasGivenNode (node) {
     return this.graph.hasNode(node);
   }
 
-  allNodes(){
+  allNodes () {
     return this.graph.nodes();
   }
 }
