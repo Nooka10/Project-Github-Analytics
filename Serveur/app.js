@@ -20,19 +20,19 @@ const app = express();
 // Enable CORS for the client app
 app.use(cors());
 
-app.get('/followers', (req, res, next) => { // eslint-disable-line no-unused-vars
+app.get('/others/followers', (req, res, next) => { // eslint-disable-line no-unused-vars
   FollowedUserModel.find({}, (err, users) => {
     res.send(users);
   });
 });
 
-app.get('/stars', (req, res, next) => { // eslint-disable-line no-unused-vars
+app.get('/others/stars', (req, res, next) => { // eslint-disable-line no-unused-vars
   StarredReposModel.find({}, (err, users) => {
     res.send(users);
   });
 });
 
-app.get('/forks', (req, res, next) => { // eslint-disable-line no-unused-vars
+app.get('/others/forks', (req, res, next) => { // eslint-disable-line no-unused-vars
   ForkedReposModel.find({}, (err, users) => {
     res.send(users);
   });

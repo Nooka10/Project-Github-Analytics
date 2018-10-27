@@ -59,13 +59,13 @@ function getSorting(order, orderBy) {
 
 const rows = [
   {
-    id: 'repo_name', numeric: false, disablePadding: true, activeSort: false, label: 'Repo',
+    id: 'repo_name', numeric: false, disablePadding: true, activeSort: true, label: 'Repo',
   },
   {
     id: 'owner', numeric: false, disablePadding: true, activeSort: true, label: 'Owner',
   },
   {
-    id: 'language', numeric: false, disablePadding: true, activeSort: false, label: 'Language',
+    id: 'language', numeric: false, disablePadding: true, activeSort: true, label: 'Language',
   },
   {
     id: 'interestNumber', numeric: false, disablePadding: true, activeSort: true, label: '',
