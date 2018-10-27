@@ -11,7 +11,6 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
-import { lighten } from '@material-ui/core/styles/colorManipulator';
 
 let counter = 0;
 function createData(avatar, pseudo, name, nb_followers, location, link) {
@@ -25,18 +24,6 @@ function getMostFollowedUsers() {
   return fetch('http://localhost:4040/others/followers')
     .then(res => res.json())
     .then(res => res.map(item => createData(item.avatar, item.pseudo, item.name, item.nb_followers, item.location, item.link)));
-}
-
-function getMostStarredRepos() {
-  return fetch('http://localhost:4040/others/stars')
-    .then(res => res.json())
-    .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_stars, item.description, item.link)));
-}
-
-function getMostForkedRepos() {
-  return fetch('http://localhost:4040/others/forks')
-    .then(res => res.json())
-    .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_forks, item.description, item.link)));
 }
 
 function desc(a, b, orderBy) {
@@ -71,7 +58,7 @@ const rows = [
     id: 'pseudo', numeric: false, disablePadding: true, activeSort: true, label: 'Pseudo',
   },
   {
-    id: 'name', numeric: false, disablePadding: true, activeSort: false, label: 'Name',
+    id: 'name', numeric: false, disablePadding: true, activeSort: true, label: 'Name',
   },
   {
     id: 'nb_followers', numeric: false, disablePadding: true, activeSort: true, label: 'Followers',
@@ -137,32 +124,6 @@ EnhancedTableHead.propTypes = {
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
 };
-
-const toolbarStyles = theme => ({
-  root: {
-    paddingRight: theme.spacing.unit,
-  },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-        color: theme.palette.secondary.main,
-        backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-      }
-      : {
-        color: theme.palette.text.primary,
-        backgroundColor: theme.palette.secondary.dark,
-      },
-  spacer: {
-    flex: '1 1 100%',
-  },
-  actions: {
-    color: theme.palette.text.secondary,
-  },
-  title: {
-    flex: '0 0 auto',
-  },
-});
-
 
 const styles = theme => ({
   root: {
