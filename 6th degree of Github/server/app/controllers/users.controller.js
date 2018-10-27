@@ -21,7 +21,7 @@ router.get('/', (req, res, next) => {
         .send(users);
     });
 });
-
+/*
 router.get('/dijkstra', (req, res, next) => {
   const userFrom = req.query.usernamefrom;
   const userTo = req.query.usernameto;
@@ -85,6 +85,7 @@ router.get('/bfs', (req, res, next) => {
       .send(smallestPaths);
   }
 });
+*/
 
 router.get('/:id', (req, res, next) => User.findById(req.params.id)
   .then((user) => {
@@ -132,6 +133,7 @@ router.post('/', (req, res, next) => {
     });
 });
 
+/*
 router.post('/addEdge', (req, res, next) => {
   const graph = req.app.get('graph');
   const { usernameFrom, usernameTo } = req.body;
@@ -155,6 +157,7 @@ router.post('/addEdge', (req, res, next) => {
       .send('Veuillez passer un "usernameFrom" et un "usernameTo" dans le body de votre requête pour pouvoir ajouter un arc au graphe.');
   }
 });
+*/
 
 router.put('/:username', (req, res, next) => {
   User.findOneAndUpdate({ login: req.params.username }, { visited: req.body.visited }, { new: true })

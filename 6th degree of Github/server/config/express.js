@@ -6,7 +6,11 @@ const methodOverride = require('method-override');
 const Graph = require('../app/graph');
 const usersController = require('../app/controllers/users.controller');
 const utilsController = require('../app/controllers/utils.controller');
-const searchController = require('../app/controllers/search.controller');
+const graphController = require('../app/controllers/graph.controller');
+const othersController = require('../app/controllers/others.controller');
+require('../app/models/followers.model');
+require('../app/models/forks.model');
+require('../app/models/stars.model');
 
 module.exports = (app, config) => {
   const env = process.env.NODE_ENV || 'development';
@@ -16,8 +20,8 @@ module.exports = (app, config) => {
   app.use(logger('dev'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({
-                                  extended: true
-                                }));
+    extended: true
+  }));
   app.use(cookieParser());
   app.use(compress());
   app.use(methodOverride());
@@ -30,12 +34,8 @@ module.exports = (app, config) => {
    */
   app.use('/users', usersController);
   app.use('/utils', utilsController);
-  app.use('/search', searchController);
-
-  app.use('/', (req, res, next) => {
-    res.status(200)
-      .send('Hey mon ami! T\'aimes ça manger des patates?!');
-  });
+  app.use('/graph', graphController);
+  app.use('/others', othersController);
 
   app.use((req, res, next) => {
     const err = new Error('Not Found');

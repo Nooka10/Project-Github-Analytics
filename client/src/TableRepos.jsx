@@ -22,13 +22,13 @@ function createData(repo_name, owner, language, interestNumber, description, lin
 }
 
 function getMostStarredRepos() {
-  return fetch('http://localhost:3000/stars')
+  return fetch('http://localhost:4040/others/stars')
     .then(res => res.json())
     .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_stars, item.description, item.link)));
 }
 
 function getMostForkedRepos() {
-  return fetch('http://localhost:3000/forks')
+  return fetch('http://localhost:4040/others/forks')
     .then(res => res.json())
     .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_forks, item.description, item.link)));
 }

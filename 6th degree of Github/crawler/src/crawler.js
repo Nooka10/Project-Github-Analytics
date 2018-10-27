@@ -150,7 +150,7 @@ class Crawler {
       })
       .then(res => setTimeout(() => res.body.forEach(
         (u) => { // on ajoute tous les followers de l'utilisateur passé en paramètre à notre DB et dans notre graphe.
-          const urlPost = `${config.url}users/addEdge`;
+          const urlPost = `${config.url}graph/addEdge`;
           return this.addUserToDB(u) // on ajoute le follower à notre DB.
             .then(() => request.post(urlPost)
               .attach({ usernameFrom: user.login, usernameTo: u.login }).retry(2, (err) => {
