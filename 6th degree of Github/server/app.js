@@ -1,22 +1,21 @@
-require('dotenv')
-  .config();
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const config = require('./config/config');
 mongoose.Promise = require('bluebird');
 
-mongoose.connect(config.db, {
+mongoose.connect(config.dbOnline, {
   useNewUrlParser: true
 });
 const db = mongoose.connection;
 db.on('error', () => {
-  throw new Error(`unable to connect to database at ${config.db}`);
+  throw new Error(`unable to connect to database at ${config.dbOnline}`);
 });
 
 const app = express();
 
-// Enable CORS for the client app
+// Active CORS pour le client
 app.use(cors());
 
 module.exports = require('./config/express')(app, config);

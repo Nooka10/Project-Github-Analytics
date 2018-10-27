@@ -2,8 +2,11 @@ const mongoose = require('mongoose');
 
 const utilsSchema = new mongoose.Schema(
   {
-    githubIdLastUserVisited: mongoose.Schema.Types.Number
-  },
+    githubIdLastUserVisited: {
+      type    : mongoose.Schema.Types.Number,
+      required: true
+    }
+  }
 );
 
 mongoose.model('Utils', utilsSchema);

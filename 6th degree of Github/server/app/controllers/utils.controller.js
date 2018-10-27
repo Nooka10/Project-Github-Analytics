@@ -7,37 +7,22 @@ require('../models/utils.model');
 
 const Utils = mongoose.model('Utils');
 
+/**
+ * Route permettant de récupérer les infos de la collection utils.
+ */
 router.get('/', (req, res, next) => Utils.find()
-  .then((users) => {
-    res.status(httpStatus.OK)
-      .send(users);
-  }));
+  .then(users => res.status(httpStatus.OK)
+    .send(users)));
 
 router.get('/:id', (req, res, next) => Utils.findById(req.params.id)
   .then((util) => {
     if (util !== null) {
-      res.status(httpStatus.OK)
+      return res.status(httpStatus.OK)
         .send(util);
     } else {
-      res.status(httpStatus.NO_CONTENT)
+      return res.status(httpStatus.NO_CONTENT)
         .send();
     }
-  })
-  .catch((err) => {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR)
-      .send(
-        {
-          status: httpStatus.INTERNAL_SERVER_ERROR,
-          title : err.title,
-          error : err.message
-        }
-      );
-  }));
-
-router.post('/', (req, res, next) => new Utils(req.body).save()
-  .then((result) => {
-    res.status(httpStatus.OK)
-      .send(result);
   })
   .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
     .send(
@@ -48,13 +33,31 @@ router.post('/', (req, res, next) => new Utils(req.body).save()
       }
     )));
 
+/**
+ * Route permettant d'ajouter des informations dans la collection utils.
+ */
+router.post('/', (req, res, next) => new Utils(req.body).save()
+  .then(result => res.status(httpStatus.OK)
+    .send(result))
+  .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
+    .send(
+      {
+        status: httpStatus.INTERNAL_SERVER_ERROR,
+        title : err.title,
+        error : err.message
+      }
+    )));
+
+/**
+ * Route permettant de modifier les informations du document correspondant à l'id reçu.
+ */
 router.put('/:id', (req, res, next) => Utils.findByIdAndUpdate(req.params.id, req.body, { new: true })
   .then((result) => {
     if (result !== null) {
-      res.status(httpStatus.OK)
+      return res.status(httpStatus.OK)
         .send(result);
     } else {
-      res.status(httpStatus.NO_CONTENT)
+      return res.status(httpStatus.NO_CONTENT)
         .send();
     }
   })
