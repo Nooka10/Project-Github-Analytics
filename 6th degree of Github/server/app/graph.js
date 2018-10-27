@@ -14,11 +14,10 @@ class Graph {
           this.graph = Graphlib.json.read(JSON.parse(g[0].json));
         } else {
           this.graph = new Graphlib.Graph(
-            /* // FIXME: ne fonctionne pas -> graph dirigé même avec l'option à false...
+            // FIXME: ne fonctionne pas -> graph dirigé même avec l'option à false...
             {
-              directed  : false
+              directed: false
             }
-            */
           );
           this.createGraphInDB()
             .then((res) => {
@@ -59,52 +58,70 @@ class Graph {
     return this.graph.edge(node1, node2); // retourne le label de l'edge liant les 2 noeuds.
   }
 
-  smallestPath (node1, node2) {
-    const res = Graphlib.alg.dijkstra(this.graph, node1);
-    // console.log(res);
-    return res;
-  }
-
-  /*
-  bfs (node1, node2) {
-    const queue = [node1];
-    const visited = { node1: true };
-    const predecessor = {};
-    let tail = 0;
-
-    while (tail < queue.length) {
-      let u = queue[tail++]; // Pop a vertex off the queue.
-      const neighbors = this.graph.neighbors(u);
-      for (let i = 0; i < neighbors.length; ++i) {
-        const v = neighbors[i];
-        if (visited[v]) {
-          continue;
-        }
-        visited[v] = true;
-        if (v === node2) { // Check if the path is complete.
-          const path = [v]; // If so, backtrack through the path.
-          while (u !== node1) {
-            u = predecessor[u];
-            path.push(u);
-          }
-          path.reverse();
-          console.log(path.join(' &rarr; '));
-          return;
-        }
-        predecessor[v] = u;
-        queue.push(v);
-      }
-    }
-    console.log(`there is no path from ${node1} to ${node2}`);
-  }
-  */
-
   hasGivenNode (node) {
     return this.graph.hasNode(node);
   }
 
   allNodes () {
     return this.graph.nodes();
+  }
+
+  smallestPath (node1, node2) {
+    const res = Graphlib.alg.dijkstra(this.graph, node1);
+
+    if (res[node2].distance !== Infinity) {
+      const path = [node2]; // On reconstruit le chemin à l'envers
+      let u = res[node2].predecessor;
+      while (u !== node1) {
+        path.push(u);
+        u = res[u].predecessor;
+      }
+      path.push(u);
+      path.reverse();
+      return {
+        dist  : res[node2].distance,
+        pathTo: path
+      };
+    } else {
+      return new Error(`Il n'y a pas de chemin entre ${node1} et ${node2}.`);
+    }
+  }
+
+  bfs (node1, node2) {
+    const queue = [node1];
+    const nodes = this.graph.nodes();
+    const dist = {};
+    nodes.forEach(n => dist[n] = -1);
+    dist[node1] = 0;
+    const pred = {};
+    let tail = 0;
+
+    while (tail < queue.length) {
+      let u = queue[tail++];
+      const neighbors = this.graph.neighbors(u);
+      for (let i = 0; i < neighbors.length; ++i) {
+        const v = neighbors[i];
+        if (dist[v] === -1) { // si le noeud n'a pas encore été visité
+          dist[v] = dist[u] + 1;
+          pred[v] = u;
+          queue.push(v);
+        }
+        if (v === node2) { // On a trouvé le noeud recherché.
+          const path = [v]; // On reconstruit le chemin à l'envers
+          while (u !== node1) {
+            path.push(u);
+            u = pred[u];
+          }
+          path.push(u);
+          path.reverse();
+          return {
+            dist  : dist[node2],
+            pathTo: path
+          };
+        }
+      }
+    }
+    return new Error(`Il n'y a pas de chemin entre ${node1} et ${node2}.`);
   }
 }
 

@@ -80,6 +80,7 @@ router.get('/bfs', (req, res, next) => {
   const userTo = req.query.usernameto;
 
   const graph = req.app.get('graph');
+  const usersOk = checkUsers(userFrom, userTo, graph);
   if (!usersOk.usersAreOk) {
     res.status(httpStatus.OK)
       .send(usersOk.message);

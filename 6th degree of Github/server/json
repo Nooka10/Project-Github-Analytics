@@ -1,6 +1,6 @@
 {
 	"options": {
-		"directed": true,
+		"directed": false,
 		"multigraph": false,
 		"compound": false
 	},
