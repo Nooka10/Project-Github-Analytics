@@ -37,10 +37,7 @@ class Graph {
   updateGraphInDB () {
     const id = this.graphInstance._id;
     return GraphModel.findByIdAndUpdate(id, { json: JSON.stringify(Graphlib.json.write(this.graph)) }, { new: true })
-      .exec()
-      .then((res) => {
-        // console.log(res);
-      });
+      .exec();
   }
 
   addNode (id, label) {

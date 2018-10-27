@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "Crawler for GitHub Analytics",
   "main": "app.js",
+  "author": "Antoine Rochat & Benoît Schopfer",
+  "license": "ISC",
   "scripts": {
     "start": "node ./app.js",
     "dev": "nodemon",
     "test": "node ./node_modules/mocha/bin/mocha"
   },
-  "author": "Antoine Rochat & Benoit Schopfer",
-  "license": "ISC",
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^5.6.1",
@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "dotenv": "^6.1.0",
+    "request": "^2.88.0",
+    "request-debug": "^0.2.0",
     "superagent": "^4.0.0-beta.5"
   }
 }

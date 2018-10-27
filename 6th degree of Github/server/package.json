@@ -30,6 +30,7 @@
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^4.0.1",
     "nyc": "^13.1.0",
-    "supertest": "^3.3.0"
+    "supertest": "^3.3.0",
+    "supports-color": "^5.5.0"
   }
 }

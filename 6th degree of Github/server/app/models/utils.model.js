@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const utilsSchema = new mongoose.Schema(
   {
-    numberFirstTovisit: mongoose.Schema.Types.Number
+    githubIdLastUserVisited: mongoose.Schema.Types.Number
   },
 );
 

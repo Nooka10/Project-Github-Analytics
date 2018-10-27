@@ -15,7 +15,7 @@ router.get('/', (req, res, next) => {
   if (req.query.visited !== undefined) {
     filter.visited = req.query.visited;
   }
-  return User.find(filter)
+  return User.find(filter).limit(+req.query.limit).exec()
     .then((users) => {
       res.status(httpStatus.OK)
         .send(users);
