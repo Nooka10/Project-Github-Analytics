@@ -4,7 +4,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import TableUsers from './TableUsers';
 import TableRepos from './TableRepos';
-import DegreesGitHub from './DegreesGitHub';
+import DegreesGitHub from './bof';
 
 class App extends Component {
   state = {
