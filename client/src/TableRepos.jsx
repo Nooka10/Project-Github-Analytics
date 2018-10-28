@@ -24,13 +24,15 @@ function createData(repo_name, owner, language, interestNumber, description, lin
 function getMostStarredRepos() {
   return fetch('https://api-projet-github.herokuapp.com/others/stars')
     .then(res => res.json())
-    .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_stars, item.description, item.link)));
+    .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_stars, item.description, item.link)))
+    .catch(err => console.log(err));
 }
 
 function getMostForkedRepos() {
   return fetch('https://api-projet-github.herokuapp.com/others/forks')
     .then(res => res.json())
-    .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_forks, item.description, item.link)));
+    .then(res => res.map(item => createData(item.repo_name, item.owner, item.language, item.nb_forks, item.description, item.link)))
+    .catch(err => console.log(err));
 }
 
 function desc(a, b, orderBy) {

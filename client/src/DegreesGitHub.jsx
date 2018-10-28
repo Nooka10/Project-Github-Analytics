@@ -191,8 +191,9 @@ class IntegrationAutosuggest extends React.Component {
             links: b,
           },
         });
-      });
-  }
+      })
+      .catch(err => console.log(err));
+  };
 
   createGraph() {
     return (

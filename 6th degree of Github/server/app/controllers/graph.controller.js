@@ -67,7 +67,8 @@ router.post('/addalledges', (req, res, next) => {
   Promise.all(promises)
     .then(() => res.status(httpStatus.OK)
       .send(`les arrêtes suivantes ont bien été ajoutés à la base de données : ${req.body.map(
-        ({ usernameFrom, usernameTo }) => `${usernameFrom} <-> ${usernameTo}`)}`))
+        ({ usernameFrom, usernameTo }) => `${usernameFrom} <-> ${usernameTo}`
+      )}`))
     .catch(err => res.status(httpStatus.OK)
       .send(err.message));
 });
@@ -90,12 +91,12 @@ function checkUsers (userFrom, userTo, graph) {
   } else if (!graph.hasGivenNode(userFrom)) {
     return {
       usersAreOk: false,
-      message   : `L\'utilisateur ${userFrom} ne se trouvent pas dans le graphe. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`
+      message   : `L\'utilisateur ${userFrom} ne se trouve pas dans le graphe. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`
     };
   } else if (!graph.hasGivenNode(userTo)) {
     return {
       usersAreOk: false,
-      message   : `L\'utilisateur ${userTo} ne se trouvent pas dans le graphe. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`
+      message   : `L\'utilisateur ${userTo} ne se trouve pas dans le graphe. Veuillez essayer avec l'un de ces utilisateurs: [${nodes}]`
     };
   }
   if (userTo === userFrom) {
@@ -121,7 +122,7 @@ router.get('/dijkstra', (req, res, next) => {
   const usersOk = checkUsers(userFrom, userTo, graph);
   if (!usersOk.usersAreOk) {
     res.status(httpStatus.OK)
-      .send(usersOk.message);
+      .send({ erreur: usersOk.message });
   } else {
     const smallestPaths = graph.smallestPathDijkstra(userFrom, userTo);
     if (smallestPaths) {
@@ -144,7 +145,7 @@ router.get('/bfs', (req, res, next) => {
   const usersOk = checkUsers(userFrom, userTo, graph);
   if (!usersOk.usersAreOk) {
     res.status(httpStatus.OK)
-      .send(usersOk.message);
+      .send({ erreur: usersOk.message });
   } else {
     const smallestPaths = graph.bfs(userFrom, userTo);
     res.status(httpStatus.OK)

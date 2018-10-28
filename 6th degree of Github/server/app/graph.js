@@ -137,7 +137,7 @@ class Graph {
         pathTo: path
       };
     } else {
-      return new Error(`Il n'y a pas de chemin entre ${node1} et ${node2}.`);
+      return { erreur: `Il n'y a pas de chemin entre ${node1} et ${node2}.` };
     }
   }
 
@@ -183,7 +183,7 @@ class Graph {
         }
       }
     }
-    return `Il n'y a pas de chemin entre ${node1} et ${node2}.`;
+    return { erreur: `Il n'y a pas de chemin entre ${node1} et ${node2}.` };
   }
 }
 
