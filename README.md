@@ -1,4 +1,8 @@
-#Project Github Analytics
+# Project Github Analytics
+
+***Créateurs: Antoine Rochat & Benoît Schopfer***
+
+## Objectif :
 
 Le but de ce projet était de proposer une page listant les utilisateurs Github les plus suivis, les repos les plus starés ainsi que les repos les plus forkés. 
 
@@ -19,9 +23,7 @@ Pour remplir notre graphe, nous utilisons un deuxième crawler qui récupère 10
 
 
 
-
-
-# Initialisation du projet
+## Initialisation du projet
 
 Notre projet est composé de :
 
