@@ -11,6 +11,7 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
+import baseUrl from './config';
 
 let counter = 0;
 function createData(avatar, pseudo, name, nb_followers, location, link) {
@@ -21,7 +22,7 @@ function createData(avatar, pseudo, name, nb_followers, location, link) {
 }
 
 function getMostFollowedUsers() {
-  return fetch('https://api-projet-github.herokuapp.com/others/followers')
+  return fetch(`${baseUrl}/others/followers`)
     .then(res => res.json())
     .then(res => res.map(item => createData(item.avatar, item.pseudo, item.name, item.nb_followers, item.location, item.link)));
 }

@@ -12,12 +12,13 @@ import Button from '@material-ui/core/Button';
 import SearchIcon from '@material-ui/icons/Search';
 import Chip from '@material-ui/core/Chip';
 import { Graph } from 'react-d3-graph';
-import Graphique from './Graph';
+import Typography from '@material-ui/core/Typography';
+import baseUrl from './config';
 
 function getUsers() {
   const users = [];
 
-  fetch('https://api-projet-github.herokuapp.com/graph/allnodes')
+  fetch(`${baseUrl}/graph/allnodes`)
     .then(res => res.json())
     .then(res => res.map(item => users.push({ label: item })));
   return users;
@@ -37,8 +38,6 @@ const myConfig = {
     highlightColor: 'lightblue',
   },
 };
-
-const counter = 0;
 
 function renderInputComponent(inputProps) {
   const {
@@ -142,11 +141,12 @@ const styles = theme => ({
 
 class IntegrationAutosuggest extends React.Component {
   state = {
-    user1: 'wycats',
-    user2: 'tsnow',
+    user1: 'macournoyer',
+    user2: 'Rerel',
     suggestions: [],
     searchActive: false,
     redraw: false,
+    pathExists: false,
   };
 
   handleSuggestionsFetchRequested = ({ value }) => {
@@ -175,6 +175,13 @@ class IntegrationAutosuggest extends React.Component {
       .then((res) => {
         if (res.pathTo !== undefined) {
           res.pathTo.map(i => a.push({ id: i }));
+          this.setState({
+            pathExists: true,
+          });
+        } else {
+          this.setState({
+            pathExists: false,
+          });
         }
       })
       .then(() => {
@@ -270,12 +277,18 @@ class IntegrationAutosuggest extends React.Component {
         </Button>
 
         <div>
-        {this.state.searchActive
-          && this.state.usersPath.nodes.map(user => (
-            <Chip key={user.id} label={user.id} className={classes.chip} />
-          ))
+          {this.state.searchActive
+            && (this.state.pathExists ? (
+              this.state.usersPath.nodes.map(user => (
+                <Chip key={user.id} label={user.id} className={classes.chip} />
+              ))) : (
+                <Typography variant="body1">
+                  Il n'y a pas de chemin entre {this.state.user1} et {this.state.user2}.
+      </Typography>
+              ))
 
-        }
+
+          }
         </div>
       </div>
     );
