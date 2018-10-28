@@ -5,7 +5,6 @@ const Agent = require('../src/agent.js');
 
 const should = chai.should();
 
-
 it('should fetch user informations', (done) => {
   const agent = new Agent(credentials);
   agent.fetchAndProcessUserInformations('ouzgaga', (err, users) => {

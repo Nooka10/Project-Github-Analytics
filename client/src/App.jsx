@@ -13,6 +13,9 @@ class App extends Component {
     value: 0,
   };
 
+  /**
+   * Permet de changer les tabs
+   */
   handleChange = (event, value) => {
     this.setState({ value });
   };
@@ -31,10 +34,12 @@ class App extends Component {
               <Tab label="6 degrees of GitHub" />
             </Tabs>
           </AppBar>
-          {value === 0 && <TableUsers />}
-          {value === 1 && <TableRepos value={value} />}
-          {value === 2 && <TableRepos value={value} />}
-          {value === 3 && <DegreesGitHub />}
+          <div style={{ marginLeft: '2%', marginRight: '2%' }}>
+            {value === 0 && <TableUsers />}
+            {value === 1 && <TableRepos value={value} />}
+            {value === 2 && <TableRepos value={value} />}
+            {value === 3 && <DegreesGitHub />}
+          </div>
         </MuiThemeProvider>
 
       </div>
