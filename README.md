@@ -58,3 +58,29 @@ Pour démarrer tous cela, il faut:
    npm start
    ```
 
+Malheureusement, à cause des limitations d'Atlas et de Heroku, notre 2nd crawler ne peut pas pleinement fonctionner...
+En effet, nous devons éviter de faire grossir la base de données pour ne pas dépasser les limites... Du coup, nous l'avons tous simplement pas activé...
+Si vous voulez le voir en action, nous vous conseillons de le faire tourner localement. Pour cela:
+
+1. Démarrez le serveur comme expliqué ci-dessus.
+2. Entrez les variables d'environnements du crawler :
+   1. copiez le fichier *.env.default* situé à la racine du dossier *Crawler6thDegreeOfGithub* et renommez le en *.env*.
+   2. Entrez les variables d'environnement manquantes, notemment:
+      - votre username Github
+      - votre token d'authentification à l'API Github
+      - l'url de votre serveur
+      - le numéro de port de votre serveur
+
+3. Lancer le crawler à l'aide de la commande :
+
+   ```bash
+   npm start
+   ```
+
+4. Si vous partez d'une base de données vide, le premier démarrage du crawler va ajouter les 100 premiers utilisateurs de Github.
+
+5. Par la suite, le crawler va lire la base de données et chercher les utilisateurs qui n'ont pas encore été visités. S'il y en a, il va en prendre 5, récupérer leurs followers et les ajouter à la base de données ainsi qu'au graphe. De plus, il va ajouter une arrête dans le graphe entre chaque utilisateur et chacun de ses followers.
+
+
+
+Si vous souhaitez utiliser une base de données déjà populée, vous pouvez utiliser les exports que nous vous avons mis dans le dossier *db* à la racine du serveur.

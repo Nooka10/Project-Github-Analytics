@@ -61,8 +61,10 @@ class Crawler {
    * @returns {*}
    */
   fetchGithubUsers () {
-    const url = `https://api.github.com/search/users?q=followers:<=1000&page=${this.firstUserToVisit.numberPageToFetch}&per_page=100`; // on récupère
-    // les 100 prochain utilisateurs
+    // const url = `https://api.github.com/search/users?q=followers:<=1000&page=${this.firstUserToVisit.numberPageToFetch}&per_page=100`; // on récupère les
+    // 100 prochain utilisateurs ayant moins de 1000 followers
+
+    const url = `https://api.github.com/users?page=${this.firstUserToVisit.numberPageToFetch}&per_page=100`; // on récupère les 100 prochain utilisateurs
     // sur l'API Github
     try {
       return request.get(url)

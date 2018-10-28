@@ -5,11 +5,11 @@ const env = process.env.NODE_ENV || 'development';
  */
 const config = {
   development: {
-    url : `localhost:${process.env.PORT || 3000}/`
+    url : `${process.env.URL}:${process.env.PORT || 3000}/`
   },
 
   test: {
-    url : `localhost:${process.env.PORT || 3000}/`
+    url : `${process.env.URL}:${process.env.PORT || 3000}/`
   },
 
   production: {
