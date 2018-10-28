@@ -29,55 +29,51 @@ router.get('/', (req, res, next) => {
     });
 });
 
-/**
- * Route permettant de récupérer l'utilisateur ayant l'id passé en paramètre.
- */
-router.get('/:id', (req, res, next) => User.findById(req.params.id)
-  .then((user) => {
-    if (user !== null) {
-      res.status(httpStatus.OK)
-        .send(user);
-    } else {
-      res.status(httpStatus.NO_CONTENT)
-        .send();
-    }
-  })
-  .catch((err) => {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR)
-      .send(
-        {
-          status: httpStatus.INTERNAL_SERVER_ERROR,
-          title : err.title,
-          error : err.message
-        }
-      );
-  }));
+function addUserToDB (user, graph) {
+  return User.find({ login: user.login })
+    .then((results) => {
+      if (results.length === 0) { // l'utilisateur n'a pas été trouvé dans la DB -> il faut l'ajouter
+        graph.addNode(user.login); // on ajoute un noeud dans le graph
+
+        return new User(user).save();
+      }
+      // Si l'utilisateur est déjà présent dans la DB, on ne fait rien.
+      return 0;
+    });
+}
 
 /**
  * Route permettant d'ajouter un utilisateur.
  */
-router.post('/', (req, res, next) => User.find({ login: req.body.login })
-  .then((results) => {
-    if (results.length === 0) { // l'utilisateur n'a pas été trouvé dans la DB -> il faut l'ajouter
-      const graph = req.app.get('graph');
-      graph.addNode(req.body.login); // on ajoute un noeud dans le graph
+router.post('/', (req, res, next) => addUserToDB(req.body, req.app.get('graph'))
+  .then((result) => {
+    res.status(httpStatus.OK)
+      .send(result);
+  })
+  .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
+    .send(
+      {
+        status: httpStatus.INTERNAL_SERVER_ERROR,
+        title : err.title,
+        error : err.message
+      }
+    )));
 
-      return new User(req.body).save()
-        .then((result) => {
-          res.status(httpStatus.OK)
-            .send(result);
-        })
-        .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
-          .send(
-            {
-              status: httpStatus.INTERNAL_SERVER_ERROR,
-              title : err.title,
-              error : err.message
-            }
-          ));
-    }
-    // Si l'utilisateur est déjà présent dans la DB, on ne fait rien.
-  }));
+/**
+ * Route permettant d'ajouter tous les utilisateurs présents dans le tableau reçu.
+ */
+router.post('/addallusers', (req, res, next) => {
+  const graph = req.app.get('graph');
+
+  const promises = [];
+  req.body.forEach((user) => {
+    promises.push(addUserToDB(user, graph));
+  });
+  return Promise.all(promises)
+    .then(() => res.status(httpStatus.OK)
+      .send(`les utilisateurs suivants ont bien été ajoutés à la base de données : ${req.body.map(u => u.login)}`));
+});
+
 
 /**
  * Route permettant de modifier l'utilisateur correspondant au username reçu.

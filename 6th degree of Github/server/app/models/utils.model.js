@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const utilsSchema = new mongoose.Schema(
   {
-    githubIdLastUserVisited: {
+    numberPageToFetch: {
       type    : mongoose.Schema.Types.Number,
       required: true
     }

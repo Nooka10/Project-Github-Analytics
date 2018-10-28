@@ -6,37 +6,62 @@ const router = express.Router();
 /**
  * Route permettant de récupérer tous les utilisateurs présents dans le graphe.
  */
-router.get('/allNodes', (req, res, next) => {
+router.get('/allnodes', (req, res, next) => {
   const graph = req.app.get('graph'); // Récupère l'instance du graphe créée lors du démarage du serveur (pour que tous les controleurs utilisent la même instance !
   return res.status(httpStatus.OK)
     .send(graph.allNodes());
 });
 
 /**
+ * Route permettant de récupérer le nombre d'edge partant du noeud reçu en paramètre.
+ */
+router.get('/edges', (req, res, next) => {
+  const graph = req.app.get('graph'); // Récupère l'instance du graphe créée lors du démarage du serveur (pour que tous les controleurs utilisent la même instance !
+  return res.status(httpStatus.OK)
+    .send(`${req.query.node} suit et est suivi par un total de ${graph.edgeOfNode(req.query.node).length} utilisateurs.`);
+});
+
+function addEdgeBetweenNodes (node1, node2, graph) {
+  const erreur = graph.addEdge(node1, node2); // on ajoute une arrête (non dirigée) reliant usernameFrom à usernameTo dans le graph.
+  if (erreur === undefined) {
+    return graph.updateGraphInDB()
+      .catch(err => console.log(err));
+  } else {
+    return erreur;
+  }
+}
+
+/**
  * Route permettant d'ajouter un edge dans le graph.
  */
-router.post('/addEdge', (req, res, next) => {
+router.post('/addedge', (req, res, next) => {
   const graph = req.app.get('graph'); // Récupère l'instance du graphe créée lors du démarage du serveur (pour que tous les controleurs utilisent la même instance !
   const { usernameFrom, usernameTo } = req.body;
-  if (usernameFrom !== undefined && usernameTo !== undefined) {
-    graph.addEdge(usernameFrom, usernameTo); // on ajoute une arrête (non dirigée) reliant usernameFrom à usernameTo dans le graph.
-    graph.updateGraphInDB()
-      .then(() => {
-        res.status(httpStatus.OK)
-          .send(`l'edge reliant ${usernameFrom} à ${usernameTo} a bien été ajouté.`);
-      })
-      .catch(err => res.status(httpStatus.INTERNAL_SERVER_ERROR)
-        .send(
-          {
-            status: httpStatus.INTERNAL_SERVER_ERROR,
-            title : err.title,
-            error : err.message
-          }
-        ));
-  } else {
+  try {
+    addEdgeBetweenNodes(usernameFrom, usernameTo, graph)
+      .then(result => res.status(httpStatus.OK)
+        .send(`l'edge reliant ${usernameFrom} à ${usernameTo} a bien été ajouté.`));
+  } catch (e) {
     res.status(httpStatus.OK)
-      .send('Veuillez passer un "usernameFrom" et un "usernameTo" dans le body de votre requête pour pouvoir ajouter un arc au graphe.');
+      .send(e.message);
   }
+});
+
+/**
+ * Route permettant d'ajouter un edge entre l'utilisateur passé en paramètre et tous ceux passé dans le tableau.
+ */
+router.post('/addalledges', (req, res, next) => {
+  const graph = req.app.get('graph');
+
+  const promises = [];
+  req.body.forEach((follower) => {
+    promises.push(addEdgeBetweenNodes(req.query.username, follower, graph));
+  });
+  Promise.all(promises)
+    .then(() => res.status(httpStatus.OK)
+      .send(`les arrêtes suivantes ont bien été ajoutés à la base de données : ${req.body.map(({ usernameFrom, usernameTo }) => `${usernameFrom} <-> ${usernameTo}`)}`))
+    .catch(err => res.status(httpStatus.OK)
+      .send(err.message));
 });
 
 /**
