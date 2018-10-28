@@ -1,5 +1,0 @@
-.env
-*.class
-
-node_modules/
-.idea/
