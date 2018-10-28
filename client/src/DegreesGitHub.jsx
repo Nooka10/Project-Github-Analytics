@@ -15,19 +15,32 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import Button from '@material-ui/core/Button';
 import SearchIcon from '@material-ui/icons/Search';
+import { Graph } from 'react-d3-graph';
 
 function getUsers() {
-  let users = [];
+  const users = [];
 
-    fetch('https://api-projet-github.herokuapp.com/users')
+  fetch('https://api-projet-github.herokuapp.com/graph/allnodes')
     .then(res => res.json())
-    .then(res => res.map(item => users.push({ label: item.login, value: item.login })));
+    .then(res => res.map(item => users.push({ label: item, value: item })));
   return users;
 }
 
 const suggestions = getUsers();
 
-console.log(suggestions);
+
+const myConfig = {
+  nodeHighlightBehavior: true,
+  node: {
+    color: 'lightgreen',
+    size: 400,
+    highlightStrokeColor: 'blue',
+  },
+  link: {
+    highlightColor: 'lightblue',
+  },
+};
+
 
 const styles = theme => ({
   root: {
@@ -190,6 +203,8 @@ const components = {
   ValueContainer,
 };
 
+const counter = 1;
+
 class IntegrationReactSelect extends React.Component {
   state = {
     user1: suggestions[0],
@@ -198,15 +213,36 @@ class IntegrationReactSelect extends React.Component {
     usersPath: [],
   };
 
-  handleChange = name => value => {
+  handleChange = name => (value) => {
     this.setState({
       [name]: value,
     });
   };
 
   handleSearch = () => {
-    this.setState({ searchActive: true, usersPath: ['antoine', 'james', 'paulenta', 'edri', 'benoit'] });
-    
+    const pathTab = [];
+    const a = [];
+    const b = [];
+    fetch(`https://api-projet-github.herokuapp.com/graph/dijkstra?usernamefrom=${this.state.user1.label}&usernameto=${this.state.user2.label}`)
+      .then(res => res.json())
+      .then(res => res.pathTo.map(i => a.push({ id: i })))
+      .then(() => {
+        for (let i = 0; i < a.length - 1; i++) {
+          console.log(i);
+          console.log(a[i]);
+
+          b.push({ source: a[i].id, target: a[i + 1].id });
+        }
+      })
+      .then(() => {
+        this.setState({
+          searchActive: true,
+          usersPath: {
+            nodes: a,
+            links: b,
+          },
+        });
+      });
   }
 
   render() {
@@ -225,7 +261,7 @@ class IntegrationReactSelect extends React.Component {
     return (
       <div className={classes.root}>
         <NoSsr>
-          
+
           <Select
             classes={classes}
             styles={selectStyles}
@@ -259,16 +295,21 @@ class IntegrationReactSelect extends React.Component {
           />
         </NoSsr>
         <Button variant="contained" size="large" color="default" className={classes.button} fullWidth onClick={this.handleSearch}>
-        Search
-        <SearchIcon className={classes.rightIcon} />
-      </Button>
+          Search
+          <SearchIcon className={classes.rightIcon} />
+        </Button>
 
-      { this.state.searchActive && 
-        <Button variant="contained" size="large" color="default" className={classes.button} fullWidth onClick={this.handleSearch}>
-        Search
-        <SearchIcon className={classes.rightIcon} />
-      </Button>
-      }
+        {this.state.searchActive
+          && (
+          <Graph
+            id="graph-id"
+            data={this.state.usersPath}
+            config={myConfig}
+            ref="graph"
+          />
+          )
+
+        }
       </div>
     );
   }
