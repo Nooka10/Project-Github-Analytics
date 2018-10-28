@@ -51,7 +51,7 @@ class Crawler {
   fetchUserToVisit () {
     const url = `${config.url}users`;
     return request.get(url)
-      .query({ visited: false, limit: 1 }) // on récupère jusqu'à 10 utilisateurs présents dans la DB mais qui n'ont pas encore été visités.
+      .query({ visited: false, limit: 5 }) // on récupère jusqu'à 10 utilisateurs présents dans la DB mais qui n'ont pas encore été visités.
       .then(results => results.body)
       .catch(err => console.log(`erreur dans fetchUserToVisit: ${err.name}\n${err.message}`));
   }
@@ -61,12 +61,15 @@ class Crawler {
    * @returns {*}
    */
   fetchGithubUsers () {
-    const url = `https://api.github.com/users?page=${this.firstUserToVisit.numberPageToFetch}&per_page=100`; // on récupère les 100 prochain utilisateurs
+    const url = `https://api.github.com/search/users?q=followers:<=1000&page=${this.firstUserToVisit.numberPageToFetch}&per_page=100`; // on récupère
+    // les 100 prochain utilisateurs
     // sur l'API Github
     try {
       return request.get(url)
         .auth(this.loggedUsername, this.oauth_token)
-        .then(res => this.addArrayOfUsersToDB(res.body.map(u => u.login))).then(() => { // on enregistre le login des utiissateurs récupérés dans notre DB.
+        .then(res => {
+          return this.addArrayOfUsersToDB(res.body.items.map(u => u.login));
+        }).then(() => { // on enregistre le login des utiissateurs récupérés dans notre DB.
           const urlPut = `${config.url}utils/${this.firstUserToVisit._id}`;
           this.firstUserToVisit.numberPageToFetch += 1;
           return request.put(urlPut, this.firstUserToVisit); // on met à jour le numéro de la dernière page d'utilisateurs fetchée sur l'API Github dans

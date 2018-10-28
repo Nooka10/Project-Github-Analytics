@@ -14,20 +14,22 @@ import Tooltip from '@material-ui/core/Tooltip';
 import baseUrl from './config';
 
 let counter = 0;
-function createData(avatar, pseudo, name, nb_followers, location, link) {
+
+function createData (avatar, pseudo, name, nb_followers, location, link) {
   counter += 1;
   return {
-    id: counter, avatar, pseudo, name, nb_followers, location, link,
+    id: counter, avatar, pseudo, name, nb_followers, location, link
   };
 }
 
 function getMostFollowedUsers() {
   return fetch(`${baseUrl}/others/followers`)
     .then(res => res.json())
-    .then(res => res.map(item => createData(item.avatar, item.pseudo, item.name, item.nb_followers, item.location, item.link)));
+    .then(res => res.map(item => createData(item.avatar, item.pseudo, item.name, item.nb_followers, item.location, item.link)))
+    .catch(err => console.log(err));
 }
 
-function desc(a, b, orderBy) {
+function desc (a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -37,39 +39,41 @@ function desc(a, b, orderBy) {
   return 0;
 }
 
-function stableSort(array, cmp) {
+function stableSort (array, cmp) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = cmp(a[0], b[0]);
-    if (order !== 0) return order;
+    if (order !== 0) {
+      return order;
+    }
     return a[1] - b[1];
   });
   return stabilizedThis.map(el => el[0]);
 }
 
-function getSorting(order, orderBy) {
+function getSorting (order, orderBy) {
   return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
 }
 
 const rows = [
   {
-    id: 'avatar', numeric: false, disablePadding: true, activeSort: false, label: 'Avatar',
+    id: 'avatar', numeric: false, disablePadding: true, activeSort: false, label: 'Avatar'
   },
   {
-    id: 'pseudo', numeric: false, disablePadding: true, activeSort: true, label: 'Pseudo',
+    id: 'pseudo', numeric: false, disablePadding: true, activeSort: true, label: 'Pseudo'
   },
   {
-    id: 'name', numeric: false, disablePadding: true, activeSort: true, label: 'Name',
+    id: 'name', numeric: false, disablePadding: true, activeSort: true, label: 'Name'
   },
   {
-    id: 'nb_followers', numeric: false, disablePadding: true, activeSort: true, label: 'Followers',
+    id: 'nb_followers', numeric: false, disablePadding: true, activeSort: true, label: 'Followers'
   },
   {
-    id: 'location', numeric: false, disablePadding: true, activeSort: true, label: 'Location',
+    id: 'location', numeric: false, disablePadding: true, activeSort: true, label: 'Location'
   },
   {
-    id: 'github_link', numeric: false, disablePadding: true, activeSort: false, label: 'Github Profil',
-  },
+    id: 'github_link', numeric: false, disablePadding: true, activeSort: false, label: 'Github Profil'
+  }
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -77,90 +81,89 @@ class EnhancedTableHead extends React.Component {
     this.props.onRequestSort(event, property);
   };
 
-  render() {
+  render () {
     const { order, orderBy } = this.props;
 
     return (
-      <TableHead>
-        <TableRow>
+      <TableHead >
+        <TableRow >
           {rows.map(row => (
             <TableCell
-              key={row.id}
-              numeric={row.numeric}
-              padding={row.disablePadding ? 'none' : 'default'}
-              sortDirection={orderBy === row.id ? order : false}
+              key = {row.id}
+              numeric = {row.numeric}
+              padding = {row.disablePadding ? 'none' : 'default'}
+              sortDirection = {orderBy === row.id ? order : false}
             >
               {
                 row.activeSort ? (
                   <Tooltip
-                    title="Sort"
-                    placement={row.numeric ? 'bottom-end' : 'bottom-start'}
-                    enterDelay={300}
+                    title = "Sort"
+                    placement = {row.numeric ? 'bottom-end' : 'bottom-start'}
+                    enterDelay = {300}
                   >
                     <TableSortLabel
-                      active={orderBy === row.id}
-                      direction={order}
-                      onClick={this.createSortHandler(row.id)}
+                      active = {orderBy === row.id}
+                      direction = {order}
+                      onClick = {this.createSortHandler(row.id)}
                     >
                       {row.label}
-                    </TableSortLabel>
-                  </Tooltip>
+                    </TableSortLabel >
+                  </Tooltip >
                 ) : (
                   <TableSortLabel>
                     {row.label}
                   </TableSortLabel>
                 )
               }
-            </TableCell>
+            </TableCell >
           ), this)}
-        </TableRow>
-      </TableHead>
+        </TableRow >
+      </TableHead >
     );
   }
 }
 
 EnhancedTableHead.propTypes = {
   onRequestSort: PropTypes.func.isRequired,
-  order: PropTypes.string.isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
+  order        : PropTypes.string.isRequired,
+  orderBy      : PropTypes.string.isRequired,
+  rowCount     : PropTypes.number.isRequired
 };
 
 const styles = theme => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing.unit * 3,
-    backgroundColor: theme.palette.background.paper,
+  root        : {
+    width          : '100%',
+    marginTop      : theme.spacing.unit * 3,
+    backgroundColor: theme.palette.background.paper
 
   },
-  table: {
-    minWidth: 1020,
+  table       : {
+    minWidth: 1020
   },
   tableWrapper: {
-    overflowX: 'auto',
-  },
+    overflowX: 'auto'
+  }
 });
 
 class EnhancedTable extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = {
-      order: 'desc',
-      orderBy: 'nb_followers',
-      data: [],
-      page: 0,
+      order      : 'desc',
+      orderBy    : 'nb_followers',
+      data       : [],
+      page       : 0,
       rowsPerPage: 10,
-      value: 0,
+      value      : 0
     };
     getMostFollowedUsers().then((res) => {
       this.setState({ data: res });
-    });
+    }).catch(err => console.log(err));
   }
 
   handleChange = (event, value) => {
     this.setState({ value });
   };
-
 
   handleRequestSort = (event, property) => {
     const orderBy = property;
@@ -181,86 +184,86 @@ class EnhancedTable extends React.Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  render() {
+  render () {
     const { classes } = this.props;
     const {
-      data, order, orderBy, rowsPerPage, page,
+      data, order, orderBy, rowsPerPage, page
     } = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
     return (
 
-      <Paper className={classes.root}>
+      <Paper className = {classes.root} >
 
-        <div className={classes.tableWrapper}>
-          <Table className={classes.table} aria-labelledby="tableTitle">
+        <div className = {classes.tableWrapper} >
+          <Table className = {classes.table} aria-labelledby = "tableTitle" >
             <EnhancedTableHead
 
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={this.handleRequestSort}
-              rowCount={data.length}
+              order = {order}
+              orderBy = {orderBy}
+              onRequestSort = {this.handleRequestSort}
+              rowCount = {data.length}
             />
-            <TableBody>
+            <TableBody >
               {stableSort(data, getSorting(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map(n => (
                   <TableRow
                     hover
-                    role="checkbox"
-                    tabIndex={-1}
-                    key={n.id}
+                    role = "checkbox"
+                    tabIndex = {-1}
+                    key = {n.id}
                   >
-                    <TableCell component="th" scope="row" padding="none">
+                    <TableCell component = "th" scope = "row" padding = "none" >
                       {<img
-                        id="avatar_user"
-                        alt="avatar_user"
-                        src={n.avatar}
-                        style={{
-                          height: 50, width: 50, borderRadius: 2, overflow: 'hidden',
+                        id = "avatar_user"
+                        alt = "avatar_user"
+                        src = {n.avatar}
+                        style = {{
+                          height: 50, width: 50, borderRadius: 2, overflow: 'hidden'
                         }}
                       />}
-                    </TableCell>
-                    <TableCell>{n.pseudo}</TableCell>
-                    <TableCell>{n.name}</TableCell>
-                    <TableCell>{n.nb_followers}</TableCell>
-                    <TableCell>{n.location}</TableCell>
-                    <TableCell>
-                      <Button variant="outlined" href={n.link} target="_blank">
+                    </TableCell >
+                    <TableCell >{n.pseudo}</TableCell >
+                    <TableCell >{n.name}</TableCell >
+                    <TableCell >{n.nb_followers}</TableCell >
+                    <TableCell >{n.location}</TableCell >
+                    <TableCell >
+                      <Button variant = "outlined" href = {n.link} target = "_blank" >
                         Go to the profil
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                      </Button >
+                    </TableCell >
+                  </TableRow >
                 ))}
               {emptyRows > 0 && (
-                <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
+                <TableRow style = {{ height: 49 * emptyRows }} >
+                  <TableCell colSpan = {6} />
+                </TableRow >
               )}
-            </TableBody>
-          </Table>
-        </div>
+            </TableBody >
+          </Table >
+        </div >
         <TablePagination
-          component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          backIconButtonProps={{
-            'aria-label': 'Previous Page',
+          component = "div"
+          count = {data.length}
+          rowsPerPage = {rowsPerPage}
+          page = {page}
+          backIconButtonProps = {{
+            'aria-label': 'Previous Page'
           }}
-          nextIconButtonProps={{
-            'aria-label': 'Next Page',
+          nextIconButtonProps = {{
+            'aria-label': 'Next Page'
           }}
-          onChangePage={this.handleChangePage}
-          onChangeRowsPerPage={this.handleChangeRowsPerPage}
+          onChangePage = {this.handleChangePage}
+          onChangeRowsPerPage = {this.handleChangeRowsPerPage}
         />
-      </Paper>
+      </Paper >
     );
   }
 }
 
 EnhancedTable.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(EnhancedTable);
