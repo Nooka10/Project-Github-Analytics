@@ -21,7 +21,7 @@ function createData(avatar, pseudo, name, nb_followers, location, link) {
 }
 
 function getMostFollowedUsers() {
-  return fetch('http://localhost:4040/others/followers')
+  return fetch('https://api-projet-github.herokuapp.com/others/followers')
     .then(res => res.json())
     .then(res => res.map(item => createData(item.avatar, item.pseudo, item.name, item.nb_followers, item.location, item.link)));
 }

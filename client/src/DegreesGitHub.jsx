@@ -10,6 +10,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SearchIcon from '@material-ui/icons/Search';
+import Chip from '@material-ui/core/Chip';
 import { Graph } from 'react-d3-graph';
 import Graphique from './Graph';
 
@@ -169,7 +170,7 @@ class IntegrationAutosuggest extends React.Component {
   handleSearch = () => {
     const a = [];
     const b = [];
-    fetch(`https://api-projet-github.herokuapp.com/graph/dijkstra?usernamefrom=${this.state.user1}&usernameto=${this.state.user2}`)
+    fetch(`https://api-projet-github.herokuapp.com/graph/bfs?usernamefrom=${this.state.user1}&usernameto=${this.state.user2}`)
       .then(res => res.json())
       .then((res) => {
         if (res.pathTo !== undefined) {
@@ -190,13 +191,7 @@ class IntegrationAutosuggest extends React.Component {
             links: b,
           },
         });
-      })
-      .then(() => this.refs.graph.componentWillReceiveProps({
-        data: {
-          nodes: [{ id: 'lol' }],
-          links: [],
-        },
-      }));
+      });
   }
 
   createGraph() {
@@ -274,14 +269,14 @@ class IntegrationAutosuggest extends React.Component {
           <SearchIcon className={classes.rightIcon} />
         </Button>
 
+        <div>
         {this.state.searchActive
-          && (this.state.redraw
-            ? (
-              <Graphique datas={this.state.usersPath} />
-            ) : (
-              <Graphique datas={this.state.usersPath}/>
-            ))
+          && this.state.usersPath.nodes.map(user => (
+            <Chip key={user.id} label={user.id} className={classes.chip} />
+          ))
+
         }
+        </div>
       </div>
     );
   }

@@ -25,33 +25,13 @@ export default class Graphique extends React.Component {
     });
   }
 
-  componentWillReceiveProps(props) {
-    const { datas } = this.props;
-    if (props.datas !== datas) {
-      this.refs.graph.datas = props.datas;
-      this.setState({
-        dataStore: props.datas,
-      });
-    }
-  }
-
   render() {
-    let users = '';
     return (
-     /* <Graph
+      <Graph
         id="graph-id"
-        data={this.state.dataStore}
+        data={this.props.datas}
         config={myConfig}
         ref="graph"
       />);
-      */
-      <div>
-
-        {
-          this.state.dataStore.map(user => users = users.concat(user).concat(' -> '))}
-          users;
-        }
-      </div>
-    )
   }
 }
