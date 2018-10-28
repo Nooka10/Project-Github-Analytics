@@ -1,28 +1,24 @@
-/* eslint-disable react/prop-types, react/jsx-handler-names */
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import Select from 'react-select';
-import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import NoSsr from '@material-ui/core/NoSsr';
+import deburr from 'lodash/deburr';
+import Autosuggest from 'react-autosuggest';
+import match from 'autosuggest-highlight/match';
+import parse from 'autosuggest-highlight/parse';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
-import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
-import CancelIcon from '@material-ui/icons/Cancel';
-import { emphasize } from '@material-ui/core/styles/colorManipulator';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SearchIcon from '@material-ui/icons/Search';
 import { Graph } from 'react-d3-graph';
+import Graphique from './Graph';
 
 function getUsers() {
   const users = [];
 
   fetch('https://api-projet-github.herokuapp.com/graph/allnodes')
     .then(res => res.json())
-    .then(res => res.map(item => users.push({ label: item, value: item })));
+    .then(res => res.map(item => users.push({ label: item })));
   return users;
 }
 
@@ -41,49 +37,96 @@ const myConfig = {
   },
 };
 
+const counter = 0;
+
+function renderInputComponent(inputProps) {
+  const {
+    classes, inputRef = () => { }, ref, ...other
+  } = inputProps;
+
+  return (
+    <TextField
+      fullWidth
+      InputProps={{
+        inputRef: (node) => {
+          ref(node);
+          inputRef(node);
+        },
+        classes: {
+          input: classes.input,
+        },
+      }}
+      {...other}
+    />
+  );
+}
+
+function renderSuggestion(suggestion, { query, isHighlighted }) {
+  const matches = match(suggestion.label, query);
+  const parts = parse(suggestion.label, matches);
+
+  return (
+    <MenuItem selected={isHighlighted} component="div">
+      <div>
+        {parts.map((part, index) => (part.highlight ? (
+          <span key={String(index)} style={{ fontWeight: 500 }}>
+            {part.text}
+          </span>
+        ) : (
+            <strong key={String(index)} style={{ fontWeight: 300 }}>
+              {part.text}
+            </strong>
+          )))}
+      </div>
+    </MenuItem>
+  );
+}
+
+function getSuggestions(value) {
+  const inputValue = deburr(value.trim()).toLowerCase();
+  const inputLength = inputValue.length;
+  let count = 0;
+
+  return inputLength === 0
+    ? []
+    : suggestions.filter((suggestion) => {
+      const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
+
+      if (keep) {
+        count += 1;
+      }
+
+      return keep;
+    });
+}
+
+function getSuggestionValue(suggestion) {
+  return suggestion.label;
+}
 
 const styles = theme => ({
   root: {
+    height: 250,
     flexGrow: 1,
-    height: '100%',
-    marginTop: '50px',
+    marginTop: 50,
   },
-  input: {
-    display: 'flex',
-    padding: 0,
+  container: {
+    position: 'relative',
   },
-  valueContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    flex: 1,
-    alignItems: 'center',
-  },
-  chip: {
-    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
-  },
-  chipFocused: {
-    backgroundColor: emphasize(
-      theme.palette.type === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
-      0.08,
-    ),
-  },
-  noOptionsMessage: {
-    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
-  },
-  singleValue: {
-    fontSize: 16,
-  },
-  placeholder: {
-    position: 'absolute',
-    left: 2,
-    fontSize: 16,
-  },
-  paper: {
+  suggestionsContainerOpen: {
     position: 'absolute',
     zIndex: 1,
     marginTop: theme.spacing.unit,
     left: 0,
     right: 0,
+  },
+  suggestion: {
+    display: 'block',
+  },
+  suggestionsList: {
+    margin: 0,
+    padding: 0,
+    listStyleType: 'none',
   },
   divider: {
     height: theme.spacing.unit * 2,
@@ -96,228 +139,156 @@ const styles = theme => ({
   },
 });
 
-function NoOptionsMessage(props) {
-  return (
-    <Typography
-      color="textSecondary"
-      className={props.selectProps.classes.noOptionsMessage}
-      {...props.innerProps}
-    >
-      {props.children}
-    </Typography>
-  );
-}
-
-function inputComponent({ inputRef, ...props }) {
-  return <div ref={inputRef} {...props} />;
-}
-
-function Control(props) {
-  return (
-    <TextField
-      fullWidth
-      InputProps={{
-        inputComponent,
-        inputProps: {
-          className: props.selectProps.classes.input,
-          inputRef: props.innerRef,
-          children: props.children,
-          ...props.innerProps,
-        },
-      }}
-      {...props.selectProps.textFieldProps}
-    />
-  );
-}
-
-function Option(props) {
-  return (
-    <MenuItem
-      buttonRef={props.innerRef}
-      selected={props.isFocused}
-      component="div"
-      style={{
-        fontWeight: props.isSelected ? 500 : 400,
-      }}
-      {...props.innerProps}
-    >
-      {props.children}
-    </MenuItem>
-  );
-}
-
-function Placeholder(props) {
-  return (
-    <Typography
-      color="textSecondary"
-      className={props.selectProps.classes.placeholder}
-      {...props.innerProps}
-    >
-      {props.children}
-    </Typography>
-  );
-}
-
-function SingleValue(props) {
-  return (
-    <Typography className={props.selectProps.classes.singleValue} {...props.innerProps}>
-      {props.children}
-    </Typography>
-  );
-}
-
-function ValueContainer(props) {
-  return <div className={props.selectProps.classes.valueContainer}>{props.children}</div>;
-}
-
-function MultiValue(props) {
-  return (
-    <Chip
-      tabIndex={-1}
-      label={props.children}
-      className={classNames(props.selectProps.classes.chip, {
-        [props.selectProps.classes.chipFocused]: props.isFocused,
-      })}
-      onDelete={props.removeProps.onClick}
-      deleteIcon={<CancelIcon {...props.removeProps} />}
-    />
-  );
-}
-
-function Menu(props) {
-  return (
-    <Paper square className={props.selectProps.classes.paper} {...props.innerProps}>
-      {props.children}
-    </Paper>
-  );
-}
-
-const components = {
-  Control,
-  Menu,
-  MultiValue,
-  NoOptionsMessage,
-  Option,
-  Placeholder,
-  SingleValue,
-  ValueContainer,
-};
-
-const counter = 1;
-
-class IntegrationReactSelect extends React.Component {
+class IntegrationAutosuggest extends React.Component {
   state = {
-    user1: suggestions[0],
-    user2: suggestions[1],
+    user1: 'wycats',
+    user2: 'tsnow',
+    suggestions: [],
     searchActive: false,
-    usersPath: [],
+    redraw: false,
   };
 
-  handleChange = name => (value) => {
+  handleSuggestionsFetchRequested = ({ value }) => {
     this.setState({
-      [name]: value,
+      suggestions: getSuggestions(value),
+    });
+  };
+
+  handleSuggestionsClearRequested = () => {
+    this.setState({
+      suggestions: [],
+    });
+  };
+
+  handleChange = name => (event, { newValue }) => {
+    this.setState({
+      [name]: newValue,
     });
   };
 
   handleSearch = () => {
-    const pathTab = [];
     const a = [];
     const b = [];
-    fetch(`https://api-projet-github.herokuapp.com/graph/dijkstra?usernamefrom=${this.state.user1.label}&usernameto=${this.state.user2.label}`)
+    fetch(`https://api-projet-github.herokuapp.com/graph/dijkstra?usernamefrom=${this.state.user1}&usernameto=${this.state.user2}`)
       .then(res => res.json())
-      .then(res => res.pathTo.map(i => a.push({ id: i })))
+      .then((res) => {
+        if (res.pathTo !== undefined) {
+          res.pathTo.map(i => a.push({ id: i }));
+        }
+      })
       .then(() => {
         for (let i = 0; i < a.length - 1; i++) {
-          console.log(i);
-          console.log(a[i]);
-
           b.push({ source: a[i].id, target: a[i + 1].id });
         }
       })
       .then(() => {
         this.setState({
           searchActive: true,
+          redraw: !this.state.redraw,
           usersPath: {
             nodes: a,
             links: b,
           },
         });
-      });
+      })
+      .then(() => this.refs.graph.componentWillReceiveProps({
+        data: {
+          nodes: [{ id: 'lol' }],
+          links: [],
+        },
+      }));
+  }
+
+  createGraph() {
+    return (
+
+      <Graph
+        id="graph"
+        data={this.state.usersPath}
+        config={myConfig}
+        ref="graph"
+      />
+    );
   }
 
   render() {
-    const { classes, theme } = this.props;
+    const { classes } = this.props;
 
-    const selectStyles = {
-      input: base => ({
-        ...base,
-        color: theme.palette.text.primary,
-        '& input': {
-          font: 'inherit',
-        },
-      }),
+    const autosuggestProps = {
+      renderInputComponent,
+      suggestions: this.state.suggestions,
+      onSuggestionsFetchRequested: this.handleSuggestionsFetchRequested,
+      onSuggestionsClearRequested: this.handleSuggestionsClearRequested,
+      getSuggestionValue,
+      renderSuggestion,
     };
 
     return (
       <div className={classes.root}>
-        <NoSsr>
+        <Autosuggest
+          {...autosuggestProps}
+          inputProps={{
+            classes,
+            label: 'GitHub User 1',
+            placeholder: 'Select a first GitHub user',
+            value: this.state.user1,
+            onChange: this.handleChange('user1'),
+          }}
+          theme={{
+            container: classes.container,
+            suggestionsContainerOpen: classes.suggestionsContainerOpen,
+            suggestionsList: classes.suggestionsList,
+            suggestion: classes.suggestion,
+          }}
+          renderSuggestionsContainer={options => (
+            <Paper {...options.containerProps} square>
+              {options.children}
+            </Paper>
+          )}
+        />
+        <div className={classes.divider} />
+        <Autosuggest
+          {...autosuggestProps}
+          inputProps={{
+            classes,
+            label: 'GitHub User 2',
+            placeholder: 'Select a second GitHub user',
+            value: this.state.user2,
+            onChange: this.handleChange('user2'),
+          }}
+          theme={{
+            container: classes.container,
+            suggestionsContainerOpen: classes.suggestionsContainerOpen,
+            suggestionsList: classes.suggestionsList,
+            suggestion: classes.suggestion,
+          }}
+          renderSuggestionsContainer={options => (
+            <Paper {...options.containerProps} square>
+              {options.children}
+            </Paper>
+          )}
+        />
 
-          <Select
-            classes={classes}
-            styles={selectStyles}
-            textFieldProps={{
-              label: 'GitHub User 1',
-              InputLabelProps: {
-                shrink: true,
-              },
-            }}
-            options={suggestions}
-            components={components}
-            value={this.state.user1}
-            onChange={this.handleChange('user1')}
-            placeholder="Search a first GitHub user"
-          />
-          <div className={classes.divider} />
-          <Select
-            classes={classes}
-            styles={selectStyles}
-            textFieldProps={{
-              label: 'GitHub User 2',
-              InputLabelProps: {
-                shrink: true,
-              },
-            }}
-            options={suggestions}
-            components={components}
-            value={this.state.user2}
-            onChange={this.handleChange('user2')}
-            placeholder="Search a second GitHub user"
-          />
-        </NoSsr>
         <Button variant="contained" size="large" color="default" className={classes.button} fullWidth onClick={this.handleSearch}>
           Search
           <SearchIcon className={classes.rightIcon} />
         </Button>
 
         {this.state.searchActive
-          && (
-          <Graph
-            id="graph-id"
-            data={this.state.usersPath}
-            config={myConfig}
-            ref="graph"
-          />
-          )
-
+          && (this.state.redraw
+            ? (
+              <Graphique datas={this.state.usersPath} />
+            ) : (
+              <Graphique datas={this.state.usersPath}/>
+            ))
         }
       </div>
     );
   }
 }
 
-IntegrationReactSelect.propTypes = {
+IntegrationAutosuggest.propTypes = {
   classes: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(IntegrationReactSelect);
+export default withStyles(styles)(IntegrationAutosuggest);
