@@ -131,7 +131,6 @@ class Crawler {
    */
   fetchUserFollowers (user) {
     const urlFollowers = `https://api.github.com/users/${user.login}/followers?per_page=100`;
-    let followers = [];
 
     /**
      * Récupère tous les followers petit à petit et appelle la fonction allFollowersAreAvailable() lorsqu'elle les a tous récupérés.
@@ -146,15 +145,16 @@ class Crawler {
       return request.get(url)
         .auth(loggedUsername, credential)
         .then((res) => {
-          followers = followers.concat(res.body.map(r => r.login));
+          const followers = res.body.map(r => r.login);
           if (res.links.next) {
-            return fetchAllFollowers(res.links.next, userLogin, loggedUsername, credential, allFollowersAreAvailable)
-              .catch((err) => {
-                console.log(`erreur dans fetchUserFollower/fetchAllFollowers après une ou plusieurs récursions: ${err.name}\n${err.message}`);
-                return err;
-              });
+            return allFollowersAreAvailable(followers) // on envoie à l'API les followers déjà récupérés.
+              .then(() => fetchAllFollowers(res.links.next, userLogin, loggedUsername, credential, allFollowersAreAvailable) // on fetch les followers suivants
+                .catch((err) => {
+                  console.log(`erreur dans fetchUserFollower/fetchAllFollowers après une ou plusieurs récursions: ${err.name}\n${err.message}`);
+                  return err;
+                }));
           } else {
-            return allFollowersAreAvailable(followers)
+            return allFollowersAreAvailable(followers) // on envoie à l'API les derniers followers récupérés.
               .catch((err) => {
                 console.log(`erreur dans fetchUserFollower/allFollowersAreAvailable: ${err.name}\n${err.message}`);
                 return err;
@@ -174,7 +174,7 @@ class Crawler {
         .then(() => addEdges(user, tabFollowers)) // on ajoute tous les folowers qui sont dans le tableau à notre DB et on crée
         // un lien entre l'utilisateur et chacun de ses followers.
         .catch((err) => {
-          console.log(`erreur dans fetchUserFollower/fetchAllFollowers: ${err.name}\n${err.message}`);
+          console.log(`erreur dans fetchUserFollower/callback: ${err.name}\n${err.message}`);
           return err;
         });
     }
@@ -182,13 +182,13 @@ class Crawler {
     try {
       // on essaye de récupérer les followers sur l'API Github
       return fetchAllFollowers(urlFollowers, user, this.loggedUsername, this.oauth_token,
-        callback(this.addArrayOfUsersToDB, this.addAllEdgesBetweenUserAndFollowers));
+                               callback(this.addArrayOfUsersToDB, this.addAllEdgesBetweenUserAndFollowers));
     } catch (err) {
       // en cas d'erreur, on attend une heure puis on réessaye.
       console.log(`erreur dans fetchUserFollower/fetchAllFollowers: ${err.name}\n${err.message}`);
       return new Promise((resolve, reject) => {
         setTimeout(fetchAllFollowers(urlFollowers, user, this.loggedUsername, this.oauth_token,
-          callback(this.addArrayOfUsersToDB, this.addAllEdgesBetweenUserAndFollowers).then(() => resolve())), 3600);
+                                     callback(this.addArrayOfUsersToDB, this.addAllEdgesBetweenUserAndFollowers).then(() => resolve())), 3600);
       });
     }
   }

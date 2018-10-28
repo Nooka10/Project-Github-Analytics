@@ -57,10 +57,13 @@ class Graph {
   /**
    * Ajoute un noeud au graph. Le label reçu (le login de l'utilisateur) est utilisé comme id et comme label.
    * @param label, le nom du noeud.
+   * @param saveChange, un booléen valant true s'il faut enregistrer immédiatement la modification du graphe dans la DB, false sinon.
    */
-  addNode (label) {
+  addNode (label, saveChange) {
     this.graph.setNode(label, label);
-    this.updateGraphInDB();
+    if (saveChange) {
+      this.updateGraphInDB();
+    }
   }
 
   /**
