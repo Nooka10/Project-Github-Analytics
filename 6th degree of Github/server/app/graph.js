@@ -57,10 +57,13 @@ class Graph {
   /**
    * Ajoute un noeud au graph. Le label reçu (le login de l'utilisateur) est utilisé comme id et comme label.
    * @param label, le nom du noeud.
+   * @param saveChange, un booléen valant true s'il faut enregistrer immédiatement la modification du graphe dans la DB, false sinon.
    */
-  addNode (label) {
+  addNode (label, saveChange) {
     this.graph.setNode(label, label);
-    this.updateGraphInDB();
+    if (saveChange) {
+      this.updateGraphInDB();
+    }
   }
 
   /**
@@ -71,9 +74,17 @@ class Graph {
   addEdge (node1, node2) {
     // comme la variable {directed:false} donnée à la création du graphe ne fonctionne pas (crée quand même un graph dirigé...), on crée un arc
     // dans les deux sens...
-    this.graph.setEdge(node1, node2);
-    this.graph.setEdge(node2, node1);
-    this.updateGraphInDB();
+
+    if (node1 === undefined || node2 === undefined || node1 === '' || node2 === '') {
+      return new Error('Veuillez passer un "usernameFrom" et un "usernameTo" dans le body de votre requête pour pouvoir ajouter un arc au graphe.');
+    } else if (node1 === node2) {
+      return new Error('"usernameFrom" et "usernameTo" ne doivent pas être identiques pour pouvoir ajouter un arc au graphe.');
+    } else {
+      this.graph.setEdge(node1, node2);
+      this.graph.setEdge(node2, node1);
+      this.updateGraphInDB();
+      return undefined;
+    }
   }
 
   /**
@@ -91,6 +102,15 @@ class Graph {
    */
   allNodes () {
     return this.graph.nodes();
+  }
+
+  /**
+   * Retourne toutes les arrêtes attaignant le noeud passé en paramètre.
+   * @param node
+   * @returns {*|void}
+   */
+  edgeOfNode (node) {
+    return this.graph.nodeEdges(node);
   }
 
   /**

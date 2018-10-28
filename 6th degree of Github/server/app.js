@@ -21,5 +21,5 @@ app.use(cors());
 module.exports = require('./config/express')(app, config);
 
 app.listen(config.port, () => {
-  console.log(`Express server listening on port ${config.port}`);
+  console.log(`Express server listening on port ${config.port} and connected to database: ${config.dbOnline}`);
 });

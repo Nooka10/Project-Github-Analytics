@@ -7,7 +7,8 @@ const Agent = require('./agent.js');
 
 const agent = new Agent(credentials);
 
-mongoose.connect('mongodb+srv://ouzgaga:ouzgaga@cluster0-7foch.gcp.mongodb.net/GithubAnalytics?retryWrites=true', (err) => {
+// mongoose.connect('mongodb+srv://ouzgaga:ouzgaga@cluster0-7foch.gcp.mongodb.net/GithubAnalytics?retryWrites=true', (err) => {
+mongoose.connect('mongodb+srv://apiuser:L1F3mWm5SP59s0jw@cluster-hchbv.gcp.mongodb.net/test?retryWrites=true', (err) => {
   if (err) { throw err; }
 });
 
@@ -40,7 +41,7 @@ agent.fetchAndProcessMostFollowedUsers((err, users) => {
           location: userInfos.location,
           link: userInfos.html_url,
         });
-        u.save().then(() => console.log('inscrit'));
+        u.save();// .then(() => console.log('inscrit'));
       }));
     });
   });
@@ -73,7 +74,7 @@ agent.fetchAndProcessMostStarredRepos((err, tab) => {
         description: repo.description,
         link: repo.html_url,
       });
-      r.save().then(() => console.log('inscrit'));
+      r.save();// .then(() => console.log('inscrit'));
     });
   });
 });
@@ -104,7 +105,7 @@ agent.fetchAndProcessMostForkedRepos((err, tab) => {
         description: repo.description,
         link: repo.html_url,
       });
-      r.save().then(() => console.log('inscrit'));
+      r.save();// .then(() => console.log('inscrit'));
     });
   });
 });
