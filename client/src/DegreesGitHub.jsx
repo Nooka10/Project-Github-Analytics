@@ -13,6 +13,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import Chip from '@material-ui/core/Chip';
 import { Graph } from 'react-d3-graph';
 import Typography from '@material-ui/core/Typography';
+import NavigationIcon from '@material-ui/icons/Navigation';
 import baseUrl from './config';
 
 function getUsers() {
@@ -145,6 +146,10 @@ const styles = theme => ({
   chip: {
     marginTop: theme.spacing.unit,
   },
+  title:{
+    marginBottom: 30,
+    display: 'inline-block',
+  },
 });
 
 class IntegrationAutosuggest extends React.Component {
@@ -236,6 +241,14 @@ class IntegrationAutosuggest extends React.Component {
 
     return (
       <div className={classes.root}>
+      <div className={classes.title}>
+        <Typography variant="title" >
+          Find the shortest path between users, inspired from :
+            <Button color="inherit" href="https://fr.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon" target="_blank" >
+            Six Degrees of Kevin Bacon
+      </Button>
+        </Typography>
+        </div>
         <Autosuggest
           {...autosuggestProps}
           inputProps={{
