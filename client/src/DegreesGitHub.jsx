@@ -73,10 +73,10 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
             {part.text}
           </span>
         ) : (
-            <strong key={String(index)} style={{ fontWeight: 300 }}>
-              {part.text}
-            </strong>
-          )))}
+          <strong key={String(index)} style={{ fontWeight: 300 }}>
+            {part.text}
+          </strong>
+        )))}
       </div>
     </MenuItem>
   );
@@ -132,17 +132,25 @@ const styles = theme => ({
     height: theme.spacing.unit * 2,
   },
   button: {
-    margin: theme.spacing.unit,
+    marginTop: theme.spacing.unit * 3,
   },
   rightIcon: {
     marginLeft: theme.spacing.unit,
+  },
+  path: {
+    marginTop: 30,
+    textAlign: 'center',
+    padding: 30,
+  },
+  chip: {
+    marginTop: theme.spacing.unit,
   },
 });
 
 class IntegrationAutosuggest extends React.Component {
   state = {
-    user1: 'macournoyer',
-    user2: 'Rerel',
+    user1: 'nooka10',
+    user2: 'paulnta',
     suggestions: [],
     searchActive: false,
     redraw: false,
@@ -276,18 +284,41 @@ class IntegrationAutosuggest extends React.Component {
           <SearchIcon className={classes.rightIcon} />
         </Button>
 
-        <div>
+        <div className={classes.path}>
+
+          {this.state.searchActive
+            && this.state.pathExists && (
+              <Typography variant="body1">
+                Chemin entre
+                {' '}
+                {this.state.user1}
+                {' '}
+                et
+                {' '}
+                {this.state.user2}
+                {' '}
+                :
+              </Typography>
+          )
+          }
           {this.state.searchActive
             && (this.state.pathExists ? (
+
               this.state.usersPath.nodes.map(user => (
+
                 <Chip key={user.id} label={user.id} className={classes.chip} />
               ))) : (
                 <Typography variant="body1">
-                  Il n'y a pas de chemin entre {this.state.user1} et {this.state.user2}.
-      </Typography>
-              ))
-
-
+                  Il n'y a pas de chemin entre
+                  {' '}
+                  {this.state.user1}
+                  {' '}
+                  et
+                  {' '}
+                  {this.state.user2}
+                  .
+                </Typography>
+            ))
           }
         </div>
       </div>

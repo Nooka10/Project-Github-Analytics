@@ -113,10 +113,10 @@ class EnhancedTableHead extends React.Component {
                     </TableSortLabel>
                   </Tooltip>
                 ) : (
-                    <TableSortLabel>
-                      {row.label}
-                    </TableSortLabel>
-                  )
+                  <TableSortLabel>
+                    {row.label}
+                  </TableSortLabel>
+                )
               }
             </TableCell>
           ), this)}
@@ -130,7 +130,6 @@ EnhancedTableHead.propTypes = {
   onRequestSort: PropTypes.func.isRequired,
   order: PropTypes.string.isRequired,
   orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
 };
 
 const styles = theme => ({
@@ -227,7 +226,7 @@ class EnhancedTable extends React.Component {
                     <TableCell>{n.owner}</TableCell>
                     <TableCell>{n.language}</TableCell>
                     <TableCell>{n.interestNumber}</TableCell>
-                    <TableCell style={{whiteSpace: 'normal', maxWidth:200}}>{n.description}</TableCell>
+                    <TableCell style={{ whiteSpace: 'normal', maxWidth: 200 }}>{n.description}</TableCell>
                     <TableCell>
                       <Button variant="outlined" href={n.link} target="_blank">
                         Go to the repo
