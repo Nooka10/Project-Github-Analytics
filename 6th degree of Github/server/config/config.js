@@ -23,10 +23,9 @@ const config = {
   },
 
   production: {
-    root    : rootPath,
-    port    : process.env.PORT || 3000,
-    db      : `mongodb://${process.env.MONGODB_HOST_PROD}:${process.env.MONGODB_PORT_PROD}/${process.env.MONGODB_DBNAME_PROD}`,
-    dbOnline: `mongodb+srv://${process.env.USER_MONGODB_ATLAS}:${process.env.PASSWORD_MONGODB_ATLAS}@${process.env.ATLAS_CONNECTION_STRING}`
+    root: rootPath,
+    port: process.env.PORT || 3000,
+    db  : `mongodb+srv://${process.env.USER_MONGODB_ATLAS}:${process.env.PASSWORD_MONGODB_ATLAS}@${process.env.ATLAS_CONNECTION_STRING}`
   }
 };
 
