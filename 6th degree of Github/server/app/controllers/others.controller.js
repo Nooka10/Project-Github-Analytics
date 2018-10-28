@@ -10,23 +10,26 @@ const followedUserModel = mongoose.model('most_followed_users');
 const starredReposModel = mongoose.model('starred_repos');
 const forkedReposModel = mongoose.model('forked_repos');
 
-router.get('/followers', (req, res, next) => { // eslint-disable-line no-unused-vars
-  followedUserModel.find({}, (err, users) => {
-    res.send(users);
-  });
-});
+/**
+ * Route permettant de récupérer les utilisateurs ayant le plus de followers.
+ */
+router.get('/followers', (req, res, next) => followedUserModel.find({}, (err, users) => {
+  res.send(users);
+}));
 
-router.get('/stars', (req, res, next) => { // eslint-disable-line no-unused-vars
-  starredReposModel.find({}, (err, users) => {
-    res.send(users);
-  });
-});
+/**
+ * Route permettant de récupérer les repos les plus starrés.
+ */
+router.get('/stars', (req, res, next) => starredReposModel.find({}, (err, users) => {
+  res.send(users);
+}));
 
-router.get('/forks', (req, res, next) => { // eslint-disable-line no-unused-vars
-  forkedReposModel.find({}, (err, users) => {
-    res.send(users);
-  });
-});
+/**
+ * Route permettant de récupérer les repos les plus forkés.
+ */
+router.get('/forks', (req, res, next) => forkedReposModel.find({}, (err, users) => {
+  res.send(users);
+}));
 
 
 module.exports = router;

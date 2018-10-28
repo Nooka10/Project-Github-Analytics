@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 
 const GraphSchema = new mongoose.Schema(
   {
-    json: mongoose.Schema.Types.String
+    json: {
+      type    : mongoose.Schema.Types.String,
+      required: true
+    }
   }
 );
 

@@ -26,7 +26,7 @@ module.exports = (app, config) => {
   app.use(compress());
   app.use(methodOverride());
 
-
+  // on crée le graph et on l'attache à app afin d'utiliser la même instance dans les contrôleurs.
   app.set('graph', new Graph());
 
   /*

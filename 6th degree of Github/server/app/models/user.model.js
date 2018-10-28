@@ -2,9 +2,15 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
-    login: mongoose.Schema.Types.String,
-    visited: mongoose.Schema.Types.Boolean
-  },
+    login  : {
+      type    : mongoose.Schema.Types.String,
+      required: true
+    },
+    visited: {
+      type    : mongoose.Schema.Types.Boolean,
+      required: true
+    }
+  }
 );
 
 mongoose.model('User', userSchema);
