@@ -104,6 +104,11 @@ class Graph {
     return this.graph.nodes();
   }
 
+  /**
+   * Retourne toutes les arrêtes attaignant le noeud passé en paramètre.
+   * @param node
+   * @returns {*|void}
+   */
   edgeOfNode (node) {
     return this.graph.nodeEdges(node);
   }

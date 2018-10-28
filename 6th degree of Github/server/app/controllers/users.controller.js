@@ -29,6 +29,12 @@ router.get('/', (req, res, next) => {
     });
 });
 
+/**
+ * Sauvegarde l'utilisateur reçu en paramètre dans la DB et l'ajoute au graphe.
+ * @param user
+ * @param graph
+ * @returns {Promise}
+ */
 function addUserToDB (user, graph) {
   return User.find({ login: user.login })
     .then((results) => {
@@ -60,14 +66,14 @@ router.post('/', (req, res, next) => addUserToDB(req.body, req.app.get('graph'))
     )));
 
 /**
- * Route permettant d'ajouter tous les utilisateurs présents dans le tableau reçu.
+ * Route permettant d'ajouter tous les utilisateurs présents dans le tableau reçu à la DB et au graphe.
  */
 router.post('/addallusers', (req, res, next) => {
   const graph = req.app.get('graph');
 
   return User.find()
     .then(results => req.body.filter(val => results.map(u => u.login)
-      .indexOf(val.login) === -1)) // on supprime les doublons
+      .indexOf(val.login) === -1)) // on supprime les utilisateurs qui sont déjà dans la DB
     .then((filtredResults) => {
       filtredResults.forEach(user => graph.addNode(user.login, false)); // on ajoute un noeud dans le graph sans enregistrer la modification
       graph.updateGraphInDB(); // on enregistre toutes les modifications faites au graphe.

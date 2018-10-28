@@ -3,27 +3,27 @@ const mongoose = require('mongoose');
 const mostForkedReposSchema = new mongoose.Schema(
   {
     repo_name  : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     owner      : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     language   : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     nb_forks   : {
-      type    : Number,
+      type    : mongoose.Schema.Types.Number,
       required: true
     },
     description: {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     link       : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     }
   }

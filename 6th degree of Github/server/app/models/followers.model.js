@@ -3,27 +3,27 @@ const mongoose = require('mongoose');
 const mostFollowedUserSchema = new mongoose.Schema(
   {
     avatar      : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     pseudo      : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     name        : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     nb_followers: {
-      type    : Number,
+      type    : mongoose.Schema.Types.Number,
       required: true
     },
     location    : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     },
     link        : {
-      type    : String,
+      type    : mongoose.Schema.Types.String,
       required: true
     }
   }

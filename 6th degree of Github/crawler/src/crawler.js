@@ -6,6 +6,7 @@ class Crawler {
    * Construit le Crawler qui va petit à petit récupérer tous les utilisateurs de Github ainsi que leurs followers et les ajouter au graphe de notre API.
    */
   constructor () {
+    console.log(config.url);
     this.loggedUsername = process.env.loggedUsername;
     this.oauth_token = process.env.oauth_token;
     const url = `${config.url}utils/`;
@@ -223,22 +224,6 @@ class Crawler {
     return request.post(urlPost, { usernameFrom: user1.login, usernameTo: user2 }) // on ajoute un edge entre l'utilisateur et le follower dans le
     // graph de notre API.
       .catch(err => console.log(`erreur dans addEdgeBetweenUsers: ${err.name}\n${err.message}`));
-  }
-
-  /**
-   * Active le crawler. Celui-ci récupèrera autant d'utilisateur que possible, tant que les 5'000 requêtes ne sont pas atteintes.
-   * Il se relance automatiquement toutes les heures.
-   */
-  activateCrawler () {
-    this.processCrawler(); // lance une 1ère fois le crawler
-    this.timer = setInterval(this.processCrawler, 10000); // attend une minute avant de relancer le crawler.
-  }
-
-  /**
-   * Permet de désactiver le crawler.
-   */
-  desactivateCrawler () {
-    clearInterval(this.timer);
   }
 }
 

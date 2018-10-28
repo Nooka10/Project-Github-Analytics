@@ -21,6 +21,13 @@ router.get('/edges', (req, res, next) => {
     .send(`${req.query.node} suit et est suivi par un total de ${graph.edgeOfNode(req.query.node).length} utilisateurs.`);
 });
 
+/**
+ * Ajoute un edge dans le graphe entre les 2 noeuds reçus en paramètres.
+ * @param node1
+ * @param node2
+ * @param graph
+ * @returns {Promise<T | void>}
+ */
 function addEdgeBetweenNodes (node1, node2, graph) {
   const erreur = graph.addEdge(node1, node2); // on ajoute une arrête (non dirigée) reliant usernameFrom à usernameTo dans le graph.
   if (erreur === undefined) {
@@ -59,7 +66,8 @@ router.post('/addalledges', (req, res, next) => {
   });
   Promise.all(promises)
     .then(() => res.status(httpStatus.OK)
-      .send(`les arrêtes suivantes ont bien été ajoutés à la base de données : ${req.body.map(({ usernameFrom, usernameTo }) => `${usernameFrom} <-> ${usernameTo}`)}`))
+      .send(`les arrêtes suivantes ont bien été ajoutés à la base de données : ${req.body.map(
+        ({ usernameFrom, usernameTo }) => `${usernameFrom} <-> ${usernameTo}`)}`))
     .catch(err => res.status(httpStatus.OK)
       .send(err.message));
 });
